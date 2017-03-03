@@ -1,3 +1,11 @@
+# OMNeT++
+out/
+*_m.h
+*_m.cc
+.project
+.cproject
+.metadata
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
