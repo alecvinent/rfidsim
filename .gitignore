@@ -1,5 +1,22 @@
 .idea/
 
+# OMNeT++
+out/
+*_m.h
+*_m.cc
+.project
+.cproject
+.metadata
+.nedexclusions
+.nedfolders
+.oppbuildspec
+rfidsimpp/rfidsimpp/Makefile
+rfidsimpp/rfidsimpp/Makefile.vc
+rfidsimpp/rfidsimpp/src/Makefile
+rfidsimpp/rfidsimpp/src/rfidsimpp
+rfidsimpp/rfidsimpp/src/rfidsimpp.exe
+rfidsimpp/rfidsimpp/simulations/run
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
