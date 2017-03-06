@@ -113,7 +113,21 @@ class Vector3 : public omnetpp::cObject {
 
 };
 
+
 double distance(const Vector3& u, const Vector3& v);
+
+
+class Object3d {
+ public:
+  Object3d(int object_id) {}
+  virtual ~Object3d() {}
+
+ private:
+  int object_id_;
+  Vector3 ex_;
+  Vector3 ey_;
+  Vector3 ez_;
+};
 
 }
 

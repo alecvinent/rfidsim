@@ -55,6 +55,7 @@ class Decibel : public omnetpp::cObject {
   }
 };
 
+
 class Power : public omnetpp::cObject {
 public:
   enum Unit { DBM, WATT };
