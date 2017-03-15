@@ -19,7 +19,9 @@ class Decibel : public omnetpp::cObject {
     return Decibel(value);
   }
 
-  Decibel(double db) : value(db) {}
+  static const Decibel ZERO;
+
+  Decibel(double db = 0.0) : value(db) {}
   Decibel(const Decibel& rside) : value(rside.value) {}
   virtual ~Decibel() {}
 
@@ -59,6 +61,7 @@ class Decibel : public omnetpp::cObject {
 class Power : public omnetpp::cObject {
 public:
   enum Unit { DBM, WATT };
+  static const Power ZERO;
 
   static const char *str(Unit unit);
   static double convert(double value, Unit from, Unit to);
@@ -79,20 +82,20 @@ public:
   double value() const { return value_; }
   Unit unit() const { return unit_; }
 
-  double get_as(Unit unit) const {
+  double getAs(Unit unit) const {
     return convert(value_, unit_, unit);
   }
 
   double watt() const {
-    return get_as(WATT);
+    return getAs(WATT);
   }
 
   double dbm() const {
-    return get_as(DBM);
+    return getAs(DBM);
   }
 
   void rebase(Unit unit) {
-    value_ = get_as(unit);
+    value_ = getAs(unit);
   }
 
   /**
@@ -146,10 +149,22 @@ public:
     return Power(dbm() + db.value, DBM);
   }
 
-  std::string to_string(Unit unit, bool adjust_scale = true) const;
+  /* Compare operations */
+  int compare(const Power& other) const;
+
+  bool operator<(const Power& other) const { return compare(other) < 0; }
+  bool operator<=(const Power& other) const { return compare(other) <= 0; }
+  bool operator>(const Power& other) const { return compare(other) > 0; }
+  bool operator>=(const Power& other) const { return compare(other) >= 0; }
+  bool operator==(const Power& other) const { return compare(other) == 0; }
+  bool operator!=(const Power& other) const { return compare(other) != 0; }
+
+  /* String'fying operations */
+
+  std::string toString(Unit unit, bool adjust_scale = true) const;
 
   virtual std::string info() const {
-    return to_string(unit_);
+    return toString(unit_);
   }
 
 private:

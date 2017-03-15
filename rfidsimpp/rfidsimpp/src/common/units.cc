@@ -17,6 +17,10 @@ Decibel Decibel::from_linear_scale(double value, double reference) {
   return Decibel(arg);
 }
 
+const Decibel Decibel::ZERO = Decibel(0.0);
+
+
+const Power Power::ZERO = Power();
 
 const char *Power::str(Power::Unit unit) {
   if (unit == WATT)
@@ -48,7 +52,19 @@ double Power::convert(double value, Unit from, Unit to) {
   }
 }
 
-std::string Power::to_string(Unit unit, bool adjust_scale) const {
+int Power::compare(const Power& other) const {
+  auto lside = value_;
+  auto rside = other.getAs(unit_);
+
+  if (lside < rside)
+    return -1;
+  else if (lside > rside)
+    return 1;
+  else
+    return 0;
+}
+
+std::string Power::toString(Unit unit, bool adjust_scale) const {
   static char buf[128];
   double value;
   const char *unit_string;

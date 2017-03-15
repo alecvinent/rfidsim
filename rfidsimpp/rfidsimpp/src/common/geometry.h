@@ -25,6 +25,10 @@ class Vector3 : public omnetpp::cObject {
   Vector3(const Vector3& other)
     : x(other.x), y(other.y), z(other.z) {}
 
+  Vector3(const omnetpp::cPar& x, const omnetpp::cPar& y,
+          const omnetpp::cPar& z)
+    : x(x.doubleValue()), y(y.doubleValue()), z(z.doubleValue()) {}
+
   virtual ~Vector3() {}
 
   Vector3& set(double x, double y, double z) {
@@ -74,7 +78,12 @@ class Vector3 : public omnetpp::cObject {
     return sqrt(dot(*this));
   }
 
-  double distance_to(const Vector3& target) const {
+  Vector3 normalized() const {
+    auto l = length();
+    return Vector3(x / l, y / l, z / l);
+  }
+
+  double getDistanceTo(const Vector3& target) const {
     auto d = *this - target;
     return d.dot(d);
   }
@@ -90,18 +99,18 @@ class Vector3 : public omnetpp::cObject {
     return Vector3(x1, y1, z1);
   }
 
-  double get_cosinus_with(const Vector3& rside) const {
+  double getCosWith(const Vector3& rside) const {
     auto d = dot(rside);
     auto l0 = length();
     auto l1 = rside.length();
     return d / (l0 * l1);
   }
 
-  double get_angle_with(const Vector3& rside) const {
-    return acos(get_cosinus_with(rside));
+  double getAngleWith(const Vector3& rside) const {
+    return acos(getCosWith(rside));
   }
 
-  std::string to_string() const {
+  std::string toString() const {
     return info();
   }
 
@@ -116,17 +125,70 @@ class Vector3 : public omnetpp::cObject {
 
 double distance(const Vector3& u, const Vector3& v);
 
+Vector3 operator*(double k, const Vector3& v);
 
-class Object3d {
+class CoordSystem : public omnetpp::cObject {
+ private:
+  Vector3 ex = Vector3::EX;
+  Vector3 ey = Vector3::EY;
+  Vector3 ez = Vector3::EZ;
+
  public:
-  Object3d(int object_id) {}
-  virtual ~Object3d() {}
+  static double VALIDATION_TOLERANCE;
+
+  CoordSystem() {}
+
+  CoordSystem(const Vector3& ex, const Vector3& ey, const Vector3& ez,
+              bool check_cartesian = true, double tol = VALIDATION_TOLERANCE)
+    : ex(ex.normalized()), ey(ey.normalized()), ez(ez.normalized())
+  {
+    if (check_cartesian)
+      validateCartesianSystem(tol);
+  }
+
+  CoordSystem(const Vector3& forward, const Vector3& up,
+              bool check_cartesian = true, double tol = VALIDATION_TOLERANCE) {
+    ex = forward.normalized();
+    ez = up.normalized();
+    ey = ez.cross(ex);
+    if (check_cartesian)
+      validateCartesianSystem(tol);
+  }
+
+  CoordSystem(const CoordSystem& other)
+    : ex(other.ex), ey(other.ey), ez(other.ez) {}
+
+  virtual ~CoordSystem() {}
+
+  virtual CoordSystem *dup() const {
+    return new CoordSystem(*this);
+  }
+
+  CoordSystem& operator=(const CoordSystem& rside) {
+    ex = rside.getEx();
+    ey = rside.getEy();
+    ez = rside.getEz();
+    return *this;
+  }
+
+  const Vector3& getEx() const { return ex; }
+  const Vector3& getEy() const { return ey; }
+  const Vector3& getEz() const { return ex; }
+
+  Vector3 relVecToAbs(const Vector3& v) const {
+    return v.x * ex + v.y * ey + v.z * ez;
+  }
+
+  CoordSystem relCsToAbs(const CoordSystem& other) const {
+    auto new_ex = relVecToAbs(other.ex);
+    auto new_ey = relVecToAbs(other.ey);
+    auto new_ez = relVecToAbs(other.ez);
+    return CoordSystem(new_ex, new_ey, new_ez);
+  }
 
  private:
-  int object_id_;
-  Vector3 ex_;
-  Vector3 ey_;
-  Vector3 ez_;
+
+  bool validateCartesianSystem(double tolerance, bool required = true);
 };
 
 }

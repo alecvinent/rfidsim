@@ -1,4 +1,4 @@
-#include <phy/transceivers.h>
+#include <power/passive-power-unit.h>
 
 using namespace omnetpp;
 

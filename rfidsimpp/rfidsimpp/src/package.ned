@@ -1,3 +1,3 @@
-package rfidsimpp;
+package rfidsim;
 
 @license(LGPL);
