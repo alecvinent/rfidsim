@@ -1,4 +1,4 @@
-#include <topology/connection-manager-signals.h>
+#include <devices/topology/connection-manager-signals.h>
 
 using namespace omnetpp;
 

@@ -5,6 +5,8 @@
 
 namespace rfidsim {
 
+class LifeManager;
+
 class LifeUnit : public omnetpp::cSimpleModule {
  public:
   static omnetpp::simsignal_t DESTROY_THING_SIGNAL_ID;
@@ -14,12 +16,14 @@ class LifeUnit : public omnetpp::cSimpleModule {
   void destroy();
 
   int getThingID() const { return thing_id; }
+  LifeManager *getLifeManager() const { return life_manager; }
 
  protected:
   virtual void initialize();
 
  private:
-  int thing_id;
+  int thing_id = -1;
+  LifeManager *life_manager = nullptr;
 };
 
 
@@ -32,6 +36,8 @@ class LifeTimeUnit : public LifeUnit {
  protected:
   virtual void initialize();
   virtual void handleMessage(omnetpp::cMessage *msg);
+
+  virtual void processTimeout();
 
  private:
   omnetpp::simtime_t lifetime = omnetpp::SimTime::ZERO;

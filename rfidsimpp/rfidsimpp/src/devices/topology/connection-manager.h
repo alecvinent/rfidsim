@@ -1,9 +1,10 @@
-#ifndef RFIDSIMPP_TOPOLOGY_CONNECTION_MANAGER_H_
-#define RFIDSIMPP_TOPOLOGY_CONNECTION_MANAGER_H_
+#ifndef RFIDSIMPP_DEVICES_TOPOLOGY_CONNECTION_MANAGER_H_
+#define RFIDSIMPP_DEVICES_TOPOLOGY_CONNECTION_MANAGER_H_
 
 #include <omnetpp.h>
-#include <mobility/mobility-signals.h>
-#include <devices/control/device-control-unit-signals.h>
+#include <devices/control/device-control-signals.h>
+#include <world/mobility/mobility-signals.h>
+#include <devices/control/device-control-signals.h>
 
 namespace rfidsim {
 

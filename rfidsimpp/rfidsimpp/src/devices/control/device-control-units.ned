@@ -9,14 +9,6 @@ simple DeviceControlUnit {
     parameters:
         @signal[DeviceCreated](type=rfidsim::DeviceCreated);
         @signal[DeviceDestroyed](type=rfidsim::DeviceDestroyed);
-}
-
-simple ReaderControlUnit extends DeviceControlUnit {
-    parameters:
-        @class(rfidsim::ReaderControlUnit);
-}
-
-simple TagControlUnit extends DeviceControlUnit {
-    parameters:
-        @class(rfidsim::TagControlUnit);
+        @signal[DestroyDevice](type=rfidsim::DestroyDevice);
+        @class(rfidsim::DeviceControlUnit);
 }

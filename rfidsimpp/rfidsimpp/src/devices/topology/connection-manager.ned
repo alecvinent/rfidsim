@@ -1,4 +1,4 @@
-package rfidsim.topology;
+package rfidsim.devices.topology;
 
 simple ConnectionManager {
     parameters:

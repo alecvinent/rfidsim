@@ -1,5 +1,5 @@
-#ifndef DEVICES_CONTROL_DEVICE_CONTROL_UNIT_SIGNALS_H_
-#define DEVICES_CONTROL_DEVICE_CONTROL_UNIT_SIGNALS_H_
+#ifndef RFIDSIMPP_DEVICES_CONTROL_DEVICE_CONTROL_SIGNALS_H_
+#define RFIDSIMPP_DEVICES_CONTROL_DEVICE_CONTROL_SIGNALS_H_
 
 #include <omnetpp.h>
 
@@ -32,6 +32,18 @@ class DeviceDestroyed : public omnetpp::cObject, omnetpp::noncopyable {
   virtual std::string info() const;
 };
 
+class DestroyDevice : public omnetpp::cObject, omnetpp::noncopyable {
+ public:
+  static const char *NAME;
+
+  int device_id = -1;
+
+  DestroyDevice() {};
+  DestroyDevice(int device_id) : device_id(device_id) {}
+
+  virtual std::string info() const;
+};
+
 }
 
-#endif /* DEVICES_CONTROL_DEVICE_CONTROL_UNIT_SIGNALS_H_ */
+#endif

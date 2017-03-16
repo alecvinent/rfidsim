@@ -1,10 +1,8 @@
-#include <topology/connection-manager.h>
-#include <topology/connection-manager-signals.h>
-#include <world/mobility/mobility-signals.h>
+#include <devices/topology/connection-manager.h>
+#include <devices/topology/connection-manager-signals.h>
+#include <devices/control/device-control-unit.h>
 #include <world/mobility/mobility-unit-base.h>
-#include <devices/control/device-control-unit-signals.h>
-#include <devices/control/device-control-units.h>
-#include <medium/medium.h>
+#include <radio/medium/medium.h>
 #include <common/module-access.h>
 
 using namespace omnetpp;
