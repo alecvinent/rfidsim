@@ -66,16 +66,17 @@ const char *Query::NAME = "Query";
 
 std::string Query::info() const
 {
-  static char buf[512];
-  snprintf(buf, sizeof(buf), "%s {DR=%s, M=%s, TRext=%d, Sel=%s, Session=%s"
-          "Target=%s, q=%X, CRC=%X}", NAME,
-          str(static_cast<DivideRatio>(getDR())),
-          str(static_cast<TagEncoding>(getM())),
-          (getTRext() ? 1 : 0),
-          str(static_cast<Sel>(getSel())),
-          str(static_cast<Session>(getSession())),
-          str(static_cast<InventoryFlag>(getTarget())),
-          getQ(), getCRC5());
+  char buf[512];
+  snprintf(buf, sizeof(buf),
+           "%s {ReaderID=%d, DR=%s, M=%s, TRext=%d, Sel=%s, Session=%s"
+           "Target=%s, q=%X, CRC=%X}", NAME, getReaderID(),
+           str(static_cast<DivideRatio>(getDR())),
+           str(static_cast<TagEncoding>(getM())),
+           (getTRext() ? 1 : 0),
+           str(static_cast<Sel>(getSel())),
+           str(static_cast<Session>(getSession())),
+           str(static_cast<InventoryFlag>(getTarget())),
+           getQ(), getCRC5());
   return buf;
 }
 
@@ -89,9 +90,9 @@ const char *QueryRep::NAME = "QueryRep";
 
 std::string QueryRep::info() const
 {
-  static char buf[512];
-  snprintf(buf, sizeof(buf), "%s {Session=%s}", NAME,
-          str(static_cast<Session>(getSession())));
+  char buf[512];
+  snprintf(buf, sizeof(buf), "%s {ReaderID=%d, Session=%s}", NAME,
+           getReaderID(), str(static_cast<Session>(getSession())));
   return buf;
 }
 
@@ -105,8 +106,9 @@ const char *Ack::NAME = "ACK";
 
 std::string Ack::info() const
 {
-  static char buf[512];
-  snprintf(buf, sizeof(buf), "%s {RN=%4X}", NAME, getRN());
+  char buf[512];
+  snprintf(buf, sizeof(buf), "%s {ReaderID=%d, RN=%4X}", NAME, getReaderID(),
+           getRN());
   return buf;
 }
 
@@ -120,8 +122,9 @@ const char *ReqRN::NAME = "ReqRN";
 
 std::string ReqRN::info() const
 {
-  static char buf[512];
-  snprintf(buf, sizeof(buf), "%s {RN=%4X, CRC=%4X}", NAME, getRN(), getCRC16());
+  char buf[512];
+  snprintf(buf, sizeof(buf), "%s {ReaderID=%d, RN=%4X, CRC=%4X}", NAME,
+           getReaderID(), getRN(), getCRC16());
   return buf;
 }
 
@@ -135,9 +138,10 @@ const char *Read::NAME = "Read";
 
 std::string Read::info() const
 {
-  static char buf[512];
+  char buf[512];
   snprintf(buf, sizeof(buf),
-          "%s {Bank=%s, WordPtr=%X, WordCount=%d, RN=%4X, CRC=%4X}", NAME,
+          "%s {ReaderID=%d, Bank=%s, WordPtr=%X, WordCount=%d, RN=%4X, "
+          "CRC=%4X}", NAME, getReaderID(),
           str(static_cast<MemoryBank>(getBank())), getWordPtr(), getWordCount(),
           getRN(), getCRC16());
   return buf;

@@ -20,6 +20,7 @@ enum CommandKind {
 }
 
 packet Command {
+    int readerID;
 }
 
 packet Query extends Command {

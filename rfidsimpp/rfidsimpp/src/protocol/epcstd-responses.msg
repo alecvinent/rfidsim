@@ -13,6 +13,7 @@ enum ReplyKind {
 }
 
 packet Reply {
+    int tagID;
 }
 
 packet QueryReply extends Reply {

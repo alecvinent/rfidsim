@@ -63,13 +63,13 @@ void TagLogicLayer::handleMessage(cMessage *msg)
   {
     auto kind = msg->getKind();
     if (kind == epcstd::KIND_COMMAND_QUERY)
-      processQuery(static_cast<epcstd::Query*>(msg));
+      processQuery(check_and_cast<epcstd::Query*>(msg));
     else if (kind == epcstd::KIND_COMMAND_QUERY_REP)
-      processQueryRep(static_cast<epcstd::QueryRep*>(msg));
+      processQueryRep(check_and_cast<epcstd::QueryRep*>(msg));
     else if (kind == epcstd::KIND_COMMAND_REQ_RN)
-      processReqRN(static_cast<epcstd::ReqRN*>(msg));
+      processReqRN(check_and_cast<epcstd::ReqRN*>(msg));
     else if (kind == epcstd::KIND_COMMAND_READ)
-      processRead(static_cast<epcstd::Read*>(msg));
+      processRead(check_and_cast<epcstd::Read*>(msg));
     else
       throw cRuntimeError("unsupported Command kind = %d", kind);
   }

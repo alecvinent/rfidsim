@@ -56,7 +56,8 @@ const char *QueryReply::NAME = "QueryReply";
 std::string QueryReply::info() const
 {
   char buf[64];
-  snprintf(buf, sizeof(buf), "%s {RN16=%4X}", NAME, getRN16());
+  snprintf(buf, sizeof(buf), "%s {TagID=%d, RN16=%4X}", NAME, getTagID(),
+           getRN16());
   return buf;
 }
 
@@ -70,8 +71,9 @@ const char *AckReply::NAME = "AckReply";
 std::string AckReply::info() const
 {
   char buf[256];
-  snprintf(buf, sizeof(buf), "%s {PC=%4X, EPC=%s, CRC=%4X}",
-           NAME, getPC(), rfidsim::toHexString(getEPC()).c_str(), getCRC());
+  snprintf(buf, sizeof(buf), "%s {TagID=%d, PC=%4X, EPC=%s, CRC=%4X}",
+           NAME, getTagID(), getPC(), rfidsim::toHexString(getEPC()).c_str(),
+           getCRC());
   return buf;
 }
 
@@ -85,7 +87,8 @@ const char *ReqRNReply::NAME = "ReqRNReply";
 std::string ReqRNReply::info() const
 {
   char buf[64];
-  snprintf(buf, sizeof(buf), "%s {RN=%4X, CRC=%4X}", NAME, getRN(), getCRC16());
+  snprintf(buf, sizeof(buf), "%s {TagID=%d, RN=%4X, CRC=%4X}", NAME,
+           getTagID(), getRN(), getCRC16());
   return buf;
 }
 
@@ -99,8 +102,9 @@ const char *ReadReply::NAME = "ReadReply";
 std::string ReadReply::info() const
 {
   char buf[256];
-  snprintf(buf, sizeof(buf), "%s {Memory=%s, RN=%4X, CRC=%4X}", NAME,
-           rfidsim::toHexString(getMem()).c_str(), getRN(), getCRC16());
+  snprintf(buf, sizeof(buf), "%s {TagID=%d, Memory=%s, RN=%4X, CRC=%4X}", NAME,
+           getTagID(), rfidsim::toHexString(getMem()).c_str(), getRN(),
+           getCRC16());
   return buf;
 }
 
