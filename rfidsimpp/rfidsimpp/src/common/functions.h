@@ -2,6 +2,7 @@
 #define COMMON_FUNCTIONS_H_
 
 #include <omnetpp.h>
+#include <cstdint>
 
 namespace rfidsim {
 
@@ -28,6 +29,8 @@ T minimum(T first, Args... args) {
 }
 
 std::string toHexString(const std::vector<uint8_t>& v);
+std::vector<uint8_t> parseHexString(const std::string& s);
+
 
 }
 

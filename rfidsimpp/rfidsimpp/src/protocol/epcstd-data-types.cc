@@ -110,4 +110,26 @@ double getTagBitRate(omnetpp::simtime_t trcal, DivideRatio dr, TagEncoding m)
   return getBLF(trcal, dr) / getSymbolsPerBit(m);
 }
 
+unsigned getSessionIndex(Session session)
+{
+  switch (session) {
+    case SESSION_0: return 0;
+    case SESSION_1: return 1;
+    case SESSION_2: return 2;
+    case SESSION_3: return 3;
+    default: throw cRuntimeError("unrecognized Session = %d", session);
+  }
+}
+
+Session getSessionFromIndex(unsigned index)
+{
+  switch (index) {
+    case 0: return SESSION_0;
+    case 1: return SESSION_1;
+    case 2: return SESSION_2;
+    case 3: return SESSION_3;
+    default: throw cRuntimeError("session index = %u out-of-bounds", index);
+  }
+}
+
 }}

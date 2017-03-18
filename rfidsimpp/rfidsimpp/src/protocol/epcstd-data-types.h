@@ -19,6 +19,9 @@ double getDivideRatioValue(DivideRatio v);
 double getBLF(omnetpp::simtime_t trcal, DivideRatio dr);
 double getTagBitRate(omnetpp::simtime_t trcal, DivideRatio dr, TagEncoding m);
 
+unsigned getSessionIndex(Session session);
+Session getSessionFromIndex(unsigned index);
+
 }}
 
 #endif
