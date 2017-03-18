@@ -7,35 +7,41 @@ cplusplus {{
 namespace rfidsim;
 
 class Power;
-class ReaderPreamble;
-class TagPreamble;
+class epcstd::ReaderPreamble;
+class epcstd::TagPreamble;
+class Decibel extends cObject;
 
 packet SendDataReq {
 }
 
 packet SendCommandReq extends SendDataReq {
-    ReaderPreamble preamble;
+    @customize(true);
+    epcstd::ReaderPreamble preamble;
     // encapsulated - a Command
 }
 
 packet SendReplyReq extends SendDataReq {
-    TagPreamble preamble;
+    @customize(true);
+    epcstd::TagPreamble preamble;
     // encapsulated - a Response
 }
 
 packet RecvBeginInd {
+    @customize(true);
 }
 
 packet RecvDataInd {
 }
 
 packet RecvReplyInd extends RecvDataInd {
-    TagPreamble preamble;
+    @customize(true);
+    epcstd::TagPreamble preamble;
     // encapsulated - a Response
 }
 
 packet RecvCommandInd extends RecvDataInd {
-    ReaderPreamble preamble;
+    @customize(true);
+    epcstd::ReaderPreamble preamble;
     // encapsulated - a Command
 }
 
@@ -45,5 +51,22 @@ enum RecvErrorType {
 }
 
 packet RecvErrorInd {
+    @customize(true);
     int type @enum(RecvErrorType);
+}
+
+
+packet AirFrame {
+    simtime_t bodyDuration;
+    Decibel modulationLoss;
+}
+
+packet ReaderAirFrame extends AirFrame {
+    epcstd::ReaderPreamble preamble;    
+    // encapsulated - a command
+}
+
+packet TagAirFrame extends AirFrame {
+    epcstd::TagPreamble preamble;
+    // encapsulated - a reply
 }

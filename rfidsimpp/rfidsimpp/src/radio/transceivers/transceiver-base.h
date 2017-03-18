@@ -2,13 +2,15 @@
 #define RADIO_TRANSCEIVERS_TRANSCEIVER_BASE_H_
 
 #include <omnetpp.h>
-#include <radio/transceivers/transceiver-signals.h>
-#include <radio/messages/radio-sap_m.h>
-#include <radio/messages/frames_m.h>
+
 #include <radio/ber/channel-models.h>
+
+#include <radio/transceivers/transceiver-signals.h>
 #include <radio/antenna-signals.h>
 #include <power/power-unit-signals.h>
 #include <topology/connection-manager-signals.h>
+
+#include <radio/transceivers/transceiver-messages.h>
 
 namespace rfidsim {
 

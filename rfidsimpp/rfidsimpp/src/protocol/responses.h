@@ -1,10 +1,11 @@
 #ifndef RFIDSIMPP_PROTOCOL_RESPONSES_H_
 #define RFIDSIMPP_PROTOCOL_RESPONSES_H_
 
+#include <epcstd-data-types.h>
 #include <omnetpp.h>
-#include <protocol/data-types.h>
 
 namespace rfidsim {
+namespace epcstd {
 
 class TagPreamble : public omnetpp::cOwnedObject {
  public:
@@ -45,6 +46,6 @@ class TagPreamble : public omnetpp::cOwnedObject {
   omnetpp::simtime_t trcal_;
 };
 
-}
+}}
 
 #endif

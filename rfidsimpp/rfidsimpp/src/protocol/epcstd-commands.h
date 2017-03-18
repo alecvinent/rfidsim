@@ -1,9 +1,11 @@
-#ifndef RFIDSIMPP_PROTOCOL_COMMANDS_H_
-#define RFIDSIMPP_PROTOCOL_COMMANDS_H_
+#ifndef RFIDSIMPP_PROTOCOL_EPCSTD_COMMANDS_H_
+#define RFIDSIMPP_PROTOCOL_EPCSTD_COMMANDS_H_
 
 #include <omnetpp.h>
+#include <protocol/epcstd-commands_m.h>
 
 namespace rfidsim {
+namespace epcstd {
 
 class ReaderPreamble : public omnetpp::cOwnedObject {
 public:
@@ -72,6 +74,101 @@ public:
   omnetpp::simtime_t delim_ = DEFAULT_DELIM;
 };
 
-}
+
+class Query : public Query_Base {
+ public:
+  static const char *NAME;
+
+  Query() : Query_Base(NAME, KIND_COMMAND_QUERY) {}
+  Query(const Query& other) : Query_Base(other) {}
+  virtual ~Query() {}
+
+  virtual Query *dup() const { return new Query(*this); }
+
+  Query& operator=(const Query& rside) {
+    Query_Base::operator=(rside);
+    return *this;
+  }
+
+  virtual std::string info() const;
+};
+
+
+class QueryRep : public QueryRep_Base {
+ public:
+  static const char *NAME;
+
+  QueryRep() : QueryRep_Base(NAME, KIND_COMMAND_QUERY_REP) {}
+  QueryRep(const QueryRep& other) : QueryRep_Base(other) {}
+  virtual ~QueryRep() {}
+
+  virtual QueryRep *dup() const { return new QueryRep(*this); }
+
+  QueryRep& operator=(const QueryRep& rside) {
+    QueryRep_Base::operator=(rside);
+    return *this;
+  }
+
+  virtual std::string info() const;
+};
+
+
+class Ack : public Ack_Base {
+ public:
+  static const char *NAME;
+
+  Ack() : Ack_Base(NAME, KIND_COMMAND_ACK) {}
+  Ack(const Ack& other) : Ack_Base(other) {}
+  virtual ~Ack() {}
+
+  virtual Ack *dup() const { return new Ack(*this); }
+
+  Ack& operator=(const Ack& rside) {
+    Ack_Base::operator=(rside);
+    return *this;
+  }
+
+  virtual std::string info() const;
+};
+
+
+class ReqRN : public ReqRN_Base {
+ public:
+  static const char *NAME;
+
+  ReqRN() : ReqRN_Base(NAME, KIND_COMMAND_REQ_RN) {}
+  ReqRN(const ReqRN& other) : ReqRN_Base(other) {}
+  virtual ~ReqRN() {}
+
+  virtual ReqRN *dup() const { return new ReqRN(*this); }
+
+  ReqRN& operator=(const ReqRN& rside) {
+    ReqRN_Base::operator=(rside);
+    return *this;
+  }
+
+  virtual std::string info() const;
+};
+
+
+class Read : public Read_Base {
+ public:
+  static const char *NAME;
+
+  Read() : Read_Base(NAME, KIND_COMMAND_READ) {}
+  Read(const Read& other) : Read_Base(other) {}
+  virtual ~Read() {}
+
+  virtual Read *dup() const { return new Read(*this); }
+
+  Read& operator=(const Read& rside) {
+    Read_Base::operator=(rside);
+    return *this;
+  }
+
+  virtual std::string info() const;
+};
+
+}}
 
 #endif

@@ -3,6 +3,7 @@
 using namespace omnetpp;
 
 namespace rfidsim {
+namespace epcstd {
 
 int TagPreamble::getBitLength() const {
   if (m_ == FM_0)
@@ -14,9 +15,9 @@ int TagPreamble::getBitLength() const {
 std::string TagPreamble::info() const {
   static char buf[256];
   snprintf(buf, sizeof(buf), "{m=%s, dr=%s, trext=%d, trcal=%.3fus}",
-      strTagEncoding(m_), strDivideRatio(dr_), trext_ ? 1 : 0,
+      str(m_), str(dr_), trext_ ? 1 : 0,
           trcal_.dbl() * 1e6);
   return buf;
 }
 
-}
+}}
