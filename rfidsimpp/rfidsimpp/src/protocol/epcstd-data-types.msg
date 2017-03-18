@@ -9,10 +9,10 @@ enum CommandType {
 }
 
 enum TagEncoding {
-    FM_0 = 0;
-    MILLER_2 = 1;
-    MILLER_4 = 2;
-    MILLER_8 = 3;
+    FM_0 = 1;
+    MILLER_2 = 2;
+    MILLER_4 = 4;
+    MILLER_8 = 8;
 }
 
 enum DivideRatio {

@@ -90,7 +90,7 @@ int getSymbolsPerBit(TagEncoding v)
   }
 }
 
-double getDivideRationValue(DivideRatio v)
+double getDivideRatioValue(DivideRatio v)
 {
   switch (v) {
     case DR_8: return 8.0;
@@ -102,7 +102,7 @@ double getDivideRationValue(DivideRatio v)
 
 double getBLF(omnetpp::simtime_t trcal, DivideRatio dr)
 {
-  return getDivideRationValue(dr) / trcal.dbl();
+  return getDivideRatioValue(dr) / trcal.dbl();
 }
 
 double getTagBitRate(omnetpp::simtime_t trcal, DivideRatio dr, TagEncoding m)
