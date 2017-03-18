@@ -57,16 +57,21 @@ packet RecvErrorInd {
 
 
 packet AirFrame {
+    simtime_t preambleDuration;
     simtime_t bodyDuration;
     Decibel modulationLoss;
+    double bandwidth;
+    // encapsualted - a command or a reply, see derived classes
 }
 
 packet ReaderAirFrame extends AirFrame {
-    epcstd::ReaderPreamble preamble;    
+    @customize(true);
+    epcstd::ReaderPreamble preamble;
     // encapsulated - a command
 }
 
 packet TagAirFrame extends AirFrame {
+    @customize(true);
     epcstd::TagPreamble preamble;
     // encapsulated - a reply
 }

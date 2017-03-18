@@ -12,16 +12,30 @@ class ChannelModel : public omnetpp::cSimpleModule {
   virtual double getBER(double snr) = 0;
 };
 
-class ConstantChannel : public ChannelModel {
+class ConstantBERChannelModel : public ChannelModel {
  public:
-  virtual ~ConstantChannel() {}
+  virtual ~ConstantBERChannelModel() {}
 
-  virtual double getBER(double snr);
+  virtual double getBER(double snr) { return ber; }
  protected:
   virtual void initialize();
 
  private:
   double ber = 0.0;
+};
+
+
+class AWGNChannelModel : public ChannelModel {
+ public:
+  virtual ~AWGNChannelModel() {}
+  virtual double getBER(double snr);
+};
+
+
+class RayleighChannelModel : public ChannelModel {
+ public:
+  virtual ~RayleighChannelModel() {}
+  virtual double getBER(double snr);
 };
 
 }
