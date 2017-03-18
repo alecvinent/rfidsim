@@ -45,6 +45,18 @@ Register_Class(Ack);
 Register_Class(ReqRN);
 Register_Class(Read);
 
+const char *str(CommandKind kind)
+{
+  switch (kind) {
+    case KIND_COMMAND_QUERY: return "Query";
+    case KIND_COMMAND_QUERY_REP: return "QueryRep";
+    case KIND_COMMAND_ACK: return "ACK";
+    case KIND_COMMAND_REQ_RN: return "ReqRN";
+    case KIND_COMMAND_READ: return "Read";
+    default: throw cRuntimeError("unrecognized CommandKind = %d", kind);
+  }
+}
+
 //
 //===========================================================================
 // Query

@@ -1,7 +1,7 @@
 cplusplus {{
 #include <common/units.h>
-#include <protocol/commands.h>
-#include <protocol/responses.h>
+#include <protocol/epcstd-commands.h>
+#include <protocol/epcstd-responses.h>
 }}
 
 namespace rfidsim;

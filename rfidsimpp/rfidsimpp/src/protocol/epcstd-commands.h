@@ -7,6 +7,8 @@
 namespace rfidsim {
 namespace epcstd {
 
+const char *str(CommandKind kind);
+
 class ReaderPreamble : public omnetpp::cOwnedObject {
 public:
   static const omnetpp::simtime_t DEFAULT_DELIM;

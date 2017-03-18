@@ -27,6 +27,8 @@ T minimum(T first, Args... args) {
   return first > second ? second : first;
 }
 
+std::string toHexString(const std::vector<uint8_t>& v);
+
 }
 
 #endif /* COMMON_FUNCTIONS_H_ */
