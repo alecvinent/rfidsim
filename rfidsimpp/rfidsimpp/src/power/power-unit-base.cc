@@ -76,7 +76,7 @@ void PowerUnit::receiveSignal(cComponent *source, simsignal_t signal_id,
   if (signal_id == DeviceControlUnit::DESTROY_DEVICE_SIGNAL_ID)
   {
     auto destroy_device = static_cast<DestroyDevice*>(obj);
-    if (destroy_device->device_id = device_id)
+    if (destroy_device->device_id == device_id)
       processDestroyDevice(*destroy_device);
   }
 }

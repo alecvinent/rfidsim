@@ -17,7 +17,6 @@ void ConstantBERChannelModel::initialize()
     EV_WARN << "BER should be in [0.0, 0.5], " << ber << " found" << std::endl;
 }
 
-
 double AWGNChannelModel::getBER(double snr)
 {
   double t = 0.5 - 0.5 * erf(sqrt(snr/2));
