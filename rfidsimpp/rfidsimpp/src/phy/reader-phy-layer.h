@@ -1,14 +1,14 @@
-#ifndef RFIDSIMPP_PHY_READER_PHY_H_
-#define RFIDSIMPP_PHY_READER_PHY_H_
+#ifndef RFIDSIMPP_PHY_READER_PHY_LAYER_H_
+#define RFIDSIMPP_PHY_READER_PHY_LAYER_H_
 
 #include <omnetpp.h>
 #include <phy/phy-layer-base.h>
 
 namespace rfidsim {
 
-class ReaderPhy : public Phy {
+class ReaderPhyLayer : public PhyLayer {
  public:
-  virtual ~ReaderPhy();
+  virtual ~ReaderPhyLayer();
 
   omnetpp::simtime_t getDelimiter() const { return delimiter; }
   omnetpp::simtime_t getTari() const { return tari; }

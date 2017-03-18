@@ -1,5 +1,5 @@
-#ifndef RFIDSIMPP_PHY_PHY_BASE_H_
-#define RFIDSIMPP_PHY_PHY_BASE_H_
+#ifndef RFIDSIMPP_PHY_PHY_LAYER_BASE_H_
+#define RFIDSIMPP_PHY_PHY_LAYER_BASE_H_
 
 #include <omnetpp.h>
 #include <phy/phy-layer-messages.h>
@@ -10,9 +10,9 @@
 
 namespace rfidsim {
 
-class Phy : public omnetpp::cSimpleModule, public omnetpp::cListener {
+class PhyLayer : public omnetpp::cSimpleModule, public omnetpp::cListener {
  public:
-  virtual ~Phy();
+  virtual ~PhyLayer();
 
   bool isOn() const { return powered; }
   bool isOff() const { return !powered; }

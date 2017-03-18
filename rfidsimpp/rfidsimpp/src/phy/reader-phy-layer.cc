@@ -4,16 +4,16 @@ using namespace omnetpp;
 
 namespace rfidsim {
 
-Define_Module(ReaderPhy);
+Define_Module(ReaderPhyLayer);
 
-ReaderPhy::~ReaderPhy()
+ReaderPhyLayer::~ReaderPhyLayer()
 {
   //TODO
 }
 
-void ReaderPhy::initialize()
+void ReaderPhyLayer::initialize()
 {
-  Phy::initialize();
+  PhyLayer::initialize();
 
   delimiter = SimTime(par("delimiter"));
   tari = SimTime(par("tari"));
@@ -21,45 +21,45 @@ void ReaderPhy::initialize()
   trcal = SimTime(par("trcal"));
 }
 
-void ReaderPhy::handleMessage(cMessage *msg)
+void ReaderPhyLayer::handleMessage(cMessage *msg)
 {
   if (dynamic_cast<epcstd::Command*>(msg))
     processCommand(static_cast<epcstd::Command*>(msg));
   else
-    Phy::handleMessage(msg);
+    PhyLayer::handleMessage(msg);
 }
 
-void ReaderPhy::processPowerOn(const PowerOn& signal)
+void ReaderPhyLayer::processPowerOn(const PowerOn& signal)
 {
   //TODO
 }
 
-void ReaderPhy::processPowerOff(const PowerOff& signal)
+void ReaderPhyLayer::processPowerOff(const PowerOff& signal)
 {
   //TODO
 }
 
-void ReaderPhy::processTimeout(cMessage *msg)
+void ReaderPhyLayer::processTimeout(cMessage *msg)
 {
   //TODO
 }
 
-void ReaderPhy::processRecvBeginInd(RecvBeginInd *msg)
+void ReaderPhyLayer::processRecvBeginInd(RecvBeginInd *msg)
 {
   //TODO
 }
 
-void ReaderPhy::processRecvDataInd(RecvDataInd *msg)
+void ReaderPhyLayer::processRecvDataInd(RecvDataInd *msg)
 {
   //TODO
 }
 
-void ReaderPhy::processRecvErrorInd(RecvErrorInd *msg)
+void ReaderPhyLayer::processRecvErrorInd(RecvErrorInd *msg)
 {
   //TODO
 }
 
-void ReaderPhy::processCommand(epcstd::Command *msg)
+void ReaderPhyLayer::processCommand(epcstd::Command *msg)
 {
   //TODO
 }

@@ -1,5 +1,5 @@
-#ifndef RFIDSIMPP_PHY_TAG_PHY_H_
-#define RFIDSIMPP_PHY_TAG_PHY_H_
+#ifndef RFIDSIMPP_PHY_TAG_PHY_LAYER_H_
+#define RFIDSIMPP_PHY_TAG_PHY_LAYER_H_
 
 #include <omnetpp.h>
 #include <common/optional.hpp>
@@ -7,9 +7,9 @@
 
 namespace rfidsim {
 
-class TagPhy : public Phy {
+class TagPhyLayer : public PhyLayer {
  public:
-  virtual ~TagPhy();
+  virtual ~TagPhyLayer();
 
  protected:
   virtual void initialize();

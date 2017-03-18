@@ -13,7 +13,7 @@ simple Phy {
 
 simple ReaderPhy extends Phy {
     parameters:
-        @class(rfidsim::ReaderPhy);
+        @class(rfidsim::ReaderPhyLayer);
         double delimiter @unit(s);
         double tari @unit(s);
         double rtcal @unit(s);
@@ -22,5 +22,5 @@ simple ReaderPhy extends Phy {
 
 simple TagPhy extends Phy {
     parameters:
-        @class(rfidsim::TagPhy);
+        @class(rfidsim::TagPhyLayer);
 }

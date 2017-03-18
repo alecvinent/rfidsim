@@ -4,63 +4,63 @@ using namespace omnetpp;
 
 namespace rfidsim {
 
-Define_Module(TagPhy);
+Define_Module(TagPhyLayer);
 
-TagPhy::~TagPhy()
+TagPhyLayer::~TagPhyLayer()
 {
   //TODO
 }
 
-void TagPhy::initialize()
+void TagPhyLayer::initialize()
 {
-  Phy::initialize();
+  PhyLayer::initialize();
   reset();
 }
 
-void TagPhy::handleMessage(cMessage *msg)
+void TagPhyLayer::handleMessage(cMessage *msg)
 {
   if (dynamic_cast<epcstd::Reply*>(msg))
     processReply(static_cast<epcstd::Reply*>(msg));
   else
-    Phy::handleMessage(msg);
+    PhyLayer::handleMessage(msg);
 }
 
-void TagPhy::processPowerOn(const PowerOn& signal)
+void TagPhyLayer::processPowerOn(const PowerOn& signal)
 {
   //TODO
 }
 
-void TagPhy::processPowerOff(const PowerOff& signal)
+void TagPhyLayer::processPowerOff(const PowerOff& signal)
 {
   //TODO
 }
 
-void TagPhy::processTimeout(cMessage *msg)
+void TagPhyLayer::processTimeout(cMessage *msg)
 {
   //TODO
 }
 
-void TagPhy::processRecvBeginInd(RecvBeginInd *msg)
+void TagPhyLayer::processRecvBeginInd(RecvBeginInd *msg)
 {
   //TODO
 }
 
-void TagPhy::processRecvDataInd(RecvDataInd *msg)
+void TagPhyLayer::processRecvDataInd(RecvDataInd *msg)
 {
   //TODO
 }
 
-void TagPhy::processRecvErrorInd(RecvErrorInd *msg)
+void TagPhyLayer::processRecvErrorInd(RecvErrorInd *msg)
 {
   //TODO
 }
 
-void TagPhy::processReply(epcstd::Reply *msg)
+void TagPhyLayer::processReply(epcstd::Reply *msg)
 {
   //TODO
 }
 
-void TagPhy::reset()
+void TagPhyLayer::reset()
 {
   encoding = nonstd::nullopt;
   divide_ratio = nonstd::nullopt;

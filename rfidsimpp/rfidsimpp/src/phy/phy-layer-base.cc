@@ -6,13 +6,13 @@ using namespace omnetpp;
 
 namespace rfidsim {
 
-Phy::~Phy()
+PhyLayer::~PhyLayer()
 {
   for (auto i = subscriptions.begin(); i != subscriptions.end(); ++i)
     i->second->unsubscribe(i->first, this);
 }
 
-void Phy::initialize()
+void PhyLayer::initialize()
 {
   powered = false;
   device_id = static_cast<int>(par("deviceID").longValue());
@@ -27,7 +27,7 @@ void Phy::initialize()
   WATCH(powered);
 }
 
-void Phy::handleMessage(cMessage *msg)
+void PhyLayer::handleMessage(cMessage *msg)
 {
   if (msg->isSelfMessage())
     processTimeout(msg);
@@ -41,7 +41,7 @@ void Phy::handleMessage(cMessage *msg)
     throw cRuntimeError("unexpected message '%s'", msg->getFullName());
 }
 
-void Phy::receiveSignal(cComponent *source, simsignal_t signal_id, cObject *obj,
+void PhyLayer::receiveSignal(cComponent *source, simsignal_t signal_id, cObject *obj,
                         cObject *details)
 {
   if (signal_id == PowerUnit::POWER_OFF_SIGNAL_ID)
@@ -64,17 +64,17 @@ void Phy::receiveSignal(cComponent *source, simsignal_t signal_id, cObject *obj,
   }
 }
 
-void Phy::processPowerOn(const PowerOn& signal)
+void PhyLayer::processPowerOn(const PowerOn& signal)
 {
   // empty handler
 }
 
-void Phy::processPowerOff(const PowerOff& signal)
+void PhyLayer::processPowerOff(const PowerOff& signal)
 {
   // empty handler
 }
 
-void Phy::processTimeout(cMessage *msg)
+void PhyLayer::processTimeout(cMessage *msg)
 {
   // empty handler
 }
