@@ -2,7 +2,7 @@
 #define LOGIC_LOGIC_LAYER_BASE_H_
 
 #include <omnetpp.h>
-#include <phy/phy-messages.h>
+#include <phy/phy-layer-messages.h>
 #include <power/power-unit-signals.h>
 #include <protocol/epcstd-commands.h>
 #include <protocol/epcstd-responses.h>

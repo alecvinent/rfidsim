@@ -2,7 +2,7 @@
 #define RFIDSIMPP_PHY_READER_PHY_H_
 
 #include <omnetpp.h>
-#include <phy/phy-base.h>
+#include <phy/phy-layer-base.h>
 
 namespace rfidsim {
 

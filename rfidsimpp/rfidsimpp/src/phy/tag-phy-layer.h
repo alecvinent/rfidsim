@@ -2,8 +2,8 @@
 #define RFIDSIMPP_PHY_TAG_PHY_H_
 
 #include <omnetpp.h>
-#include <phy/phy-base.h>
 #include <common/optional.hpp>
+#include <phy/phy-layer-base.h>
 
 namespace rfidsim {
 

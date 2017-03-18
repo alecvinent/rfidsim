@@ -2,7 +2,7 @@
 #define RFIDSIMPP_PHY_PHY_BASE_H_
 
 #include <omnetpp.h>
-#include <phy/phy-messages.h>
+#include <phy/phy-layer-messages.h>
 #include <protocol/epcstd-commands.h>
 #include <protocol/epcstd-responses.h>
 #include <radio/transceivers/transceiver-messages.h>

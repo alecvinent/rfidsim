@@ -2,7 +2,7 @@
 #define RFIDSIMPP_PHY_PHY_MESSAGES_H_
 
 #include <omnetpp.h>
-#include <phy/phy-messages_m.h>
+#include <phy/phy-layer-messages_m.h>
 
 namespace rfidsim {
 
