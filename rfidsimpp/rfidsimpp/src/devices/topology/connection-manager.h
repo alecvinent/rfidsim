@@ -36,7 +36,8 @@ class ConnectionManager : public omnetpp::cSimpleModule,
   void updateConnections(int device_id);
   void removeDevice(int device_id);
 
-  void emitConnectionCreated(int reader_id, int tag_id);
+  void emitConnectionCreated(int reader_id, int tag_id,
+                             omnetpp::cModule *reader, omnetpp::cModule *tag);
   void emitConnectionLost(int reader_id, int tag_id);
 
  private:

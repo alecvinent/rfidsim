@@ -184,14 +184,16 @@ void ConnectionManager::updateConnections(int device_id)
   if (device_record.role == ROLE_READER)
   {
     for (auto peer_id: new_peers)
-      emitConnectionCreated(device_id, peer_id);
+      emitConnectionCreated(device_id, peer_id, devices[device_id].device,
+                            devices[peer_id].device);
     for (auto peer_id: removed_peers)
       emitConnectionLost(device_id, peer_id);
   }
   else if (device_record.role == ROLE_TAG)
   {
     for (auto peer_id: new_peers)
-      emitConnectionCreated(peer_id, device_id);
+      emitConnectionCreated(peer_id, device_id, devices[peer_id].device,
+                            devices[device_id].device);
     for (auto peer_id: removed_peers)
       emitConnectionLost(peer_id, device_id);
   }
@@ -232,9 +234,11 @@ void ConnectionManager::removeDevice(int device_id)
   }
 }
 
-void ConnectionManager::emitConnectionCreated(int reader_id, int tag_id)
+void ConnectionManager::emitConnectionCreated(
+        int reader_id, int tag_id, omnetpp::cModule *reader,
+        omnetpp::cModule *tag)
 {
-  ConnectionCreated signal_(reader_id, tag_id);
+  ConnectionCreated signal_(reader_id, tag_id, reader, tag);
   emit(CONNECTION_CREATED_SIGNAL_ID, &signal_);
 }
 

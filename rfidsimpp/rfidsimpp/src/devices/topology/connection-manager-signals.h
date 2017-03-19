@@ -16,8 +16,9 @@ public:
 
   ConnectionCreated() {}
 
-  ConnectionCreated(int reader_id, int tag_id)
-    : reader_id(reader_id), tag_id(tag_id) {}
+  ConnectionCreated(int reader_id, int tag_id, omnetpp::cModule *reader,
+                    omnetpp::cModule *tag)
+    : reader_id(reader_id), tag_id(tag_id), reader(reader), tag(tag) {}
 
   virtual ~ConnectionCreated() {}
 
