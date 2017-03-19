@@ -16,6 +16,7 @@ simple Antenna extends MobilityUnit {
         
         double cableLoss @unit(dB);
         double gain @unit(dB);
+        string polarization; // "horizontal", "vertical" or "circular"
         
         forwardUpdates = false;
     gates:

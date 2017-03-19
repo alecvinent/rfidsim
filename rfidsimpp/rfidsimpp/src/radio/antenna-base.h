@@ -23,6 +23,12 @@ class Antenna : public StationaryMobilityUnit {
   static omnetpp::simsignal_t RADIATED_FIELD_UPDATED_SIGNAL_ID;
   static omnetpp::simsignal_t ANTENNA_ACTIVATED_SIGNAL_ID;
 
+  enum Polarization {
+    HORIZONTAL, VERTICAL, CIRCULAR
+  };
+  static const char *str(Polarization polarization);
+  static Decibel getPolarizationLoss(Polarization txp, Polarization rxp);
+
   virtual ~Antenna();
 
   int getDeviceID() const { return device_id; }
@@ -32,6 +38,7 @@ class Antenna : public StationaryMobilityUnit {
   const bool isActive() const { return is_active; }
   bool isPowered() const { return is_powered; }
   const Power& getPower() const { return power; }
+  Polarization getPolarization() const { return polarization; }
 
   void setIndex(int index) { this->index = index; }
 
@@ -66,6 +73,7 @@ class Antenna : public StationaryMobilityUnit {
   int index = 0;
   Decibel gain = Decibel::ZERO;
   Decibel cable_loss = Decibel::ZERO;
+  Polarization polarization;
 
   bool is_active = false;
   bool is_powered = false;

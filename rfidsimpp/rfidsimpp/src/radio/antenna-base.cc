@@ -39,6 +39,28 @@ simsignal_t Antenna::RADIATED_FIELD_UPDATED_SIGNAL_ID =
 simsignal_t Antenna::ANTENNA_ACTIVATED_SIGNAL_ID =
         registerSignal(AntennaActivated::NAME);
 
+const char *Antenna::str(Polarization polarization)
+{
+  switch (polarization) {
+    case HORIZONTAL: return "Horizontal";
+    case VERTICAL: return "Vertical";
+    case CIRCULAR: return "Circular";
+    default: throw cRuntimeError("unrecognized polarization = %d",
+                                 polarization);
+  }
+}
+
+Decibel Antenna::getPolarizationLoss(Polarization txp, Polarization rxp)
+{
+  if (txp == rxp) return Decibel::ZERO;
+  if (txp == CIRCULAR || rxp == CIRCULAR)
+    return Decibel(-8.0);
+
+  // If one antenna is horizontal and another is vertical polarized, assume
+  // loss will be too large to receive anything (say, -100dB)
+  return Decibel(-100.0);
+}
+
 Antenna::~Antenna()
 {
   for (auto i = subscriptions.begin(); i != subscriptions.end(); ++i)
@@ -182,8 +204,12 @@ void Antenna::processRadiatedFieldOff(const RadiatedFieldOff& upd)
 void Antenna::processRadiatedFieldOn(const RadiatedFieldOn& upd)
 {
   if (!is_active) return;
+  auto peer_polarization = upd.peer_antenna->getPolarization();
+
   auto path_loss = medium->getPathLoss(upd.peer_antenna, this);
-  auto full_loss = path_loss + cable_loss;
+  auto polarization_loss = getPolarizationLoss(peer_polarization, polarization);
+  auto full_loss = path_loss + cable_loss + polarization_loss;
+
   auto received_power = upd.radiated_power.amplify(full_loss);
   ReceivedFieldOn signal_(upd.device_id, upd.peer_antenna, received_power);
   emit(RECEIVED_FIELD_ON_SIGNAL_ID, &signal_);
@@ -192,8 +218,12 @@ void Antenna::processRadiatedFieldOn(const RadiatedFieldOn& upd)
 void Antenna::processRadiatedFieldUpdated(const RadiatedFieldUpdated& upd)
 {
   if (!is_active) return;
+  auto peer_polarization = upd.peer_antenna->getPolarization();
+
   auto path_loss = medium->getPathLoss(upd.peer_antenna, this);
-  auto full_loss = path_loss + cable_loss;
+  auto polarization_loss = getPolarizationLoss(peer_polarization, polarization);
+  auto full_loss = path_loss + cable_loss + polarization_loss;
+
   auto received_power = upd.radiated_power.amplify(full_loss);
   ReceivedFieldUpdated signal_(upd.device_id, upd.peer_antenna, received_power);
   emit(RECEIVED_FIELD_UPDATED_SIGNAL_ID, &signal_);
