@@ -1,27 +1,41 @@
 package rfidsim.radio.transceivers;
+import rfidsim.radio.ber.*;
 
-simple ActiveReceiver like IReceiver {
+simple ActiveReceiver extends Receiver
+{
     parameters:
         @class(rfidsim::ActiveReceiver);
-        int deviceID;
-    gates:
-        output phyOut;
-        input radioInp;
 }
 
-simple ActiveTransmitter like ITransmitter {
+simple ActiveTransmitter extends Transmitter
+{
     parameters:
         @class(rfidsim::ActiveTransmitter);
-        @signal[TxStart](type=rfidsim::TxStart);
-        @signal[TxFinish](type=rfidsim::TxFinish);
-        int deviceID;
-        double bandwidth @unit(Hz) = default(1.2e6Hz);
-    gates:
-        input phyInp;
 }
 
-module ActiveTransceiver extends Transceiver {
+module ActiveTransceiver
+{
     parameters:
-        rx.typename = "rfidsim.radio.transceivers.ActiveReceiver";
-        tx.typename = "rfidsim.radio.transceivers.ActiveTransmitter";
+        @display("i=block/rxtx;bgb=285,150");
+        int deviceID;
+    gates:
+        input phyInp;
+        output phyOut;
+        input radioInp;
+    submodules:
+        rx: ActiveReceiver {
+            @display("p=210,70");
+            deviceID = this.deviceID;
+        }
+        tx: ActiveTransmitter {
+            @display("p=130,70");
+            deviceID = this.deviceID;
+        }
+        chan: <> like IChannelModel {
+            @display("p=50,70");
+        }
+    connections:
+        phyInp --> tx.phyInp;
+        phyOut <-- rx.phyOut;
+        radioInp --> rx.radioInp;
 }

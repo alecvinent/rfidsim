@@ -1,28 +1,40 @@
 package rfidsim.radio.transceivers;
+import rfidsim.radio.ber.*;
 
-simple PassiveReceiver like IReceiver {
+simple PassiveReceiver extends Receiver {
     parameters:
         @class(rfidsim::PassiveReceiver);
-        int deviceID;
-    gates:
-        output phyOut;
-        input radioInp;
 }
 
-simple PassiveTransmitter like ITransmitter {
+simple PassiveTransmitter extends Transmitter {
     parameters:
         @class(rfidsim::PassiveTransmitter);
-        @signal[TxStart](type=rfidsim::TxStart);
-        @signal[TxFinish](type=rfidsim::TxFinish);
-        int deviceID;
-        double bandwidth @unit(Hz) = default(1.2e6Hz);
-        double modulationLoss @unit(dB) = default(-3dB);
-    gates:
-        input phyInp;
+        double modulationLoss @unit(dB);
 }
 
-module PassiveTransceiver extends Transceiver {
+module PassiveTransceiver {
     parameters:
-        rx.typename = "rfidsim.radio.transceivers.PassiveReceiver";
-        tx.typename = "rfidsim.radio.transceivers.PassiveTransmitter";
+        @display("i=block/rxtx;bgb=285,150");
+        int deviceID;
+    gates:
+        input phyInp;
+        output phyOut;
+        input radioInp;
+    submodules:
+        rx: PassiveReceiver {
+            @display("p=210,70");
+            deviceID = this.deviceID;
+        }
+        tx: PassiveTransmitter {
+            @display("p=130,70");
+            deviceID = this.deviceID;
+        }
+        chan: ConstantBERChannelModel {
+            @display("p=50,70");
+            ber = default(0.0);
+        }
+    connections:
+        phyInp --> tx.phyInp;
+        phyOut <-- rx.phyOut;
+        radioInp --> rx.radioInp;
 }
