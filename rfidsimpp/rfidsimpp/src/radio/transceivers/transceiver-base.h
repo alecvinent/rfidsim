@@ -120,8 +120,6 @@ class Receiver : public omnetpp::cSimpleModule, public omnetpp::cListener {
    */
   virtual double getFrameSNR(AirFrame *frame, double raw_snr) const = 0;
 
-  virtual unsigned getFrameBitLength(AirFrame *frame) const = 0;
-
   virtual RecvDataInd *buildRecvDataInd(AirFrame *frame) const = 0;
 
  private:

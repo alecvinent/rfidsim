@@ -398,8 +398,8 @@ void Receiver::processTimeout(cMessage *timeout)
       double ber = channel->getBER(snr);
 
       // 3) decide whether to deliver to the upper layer
-      unsigned frame_bit_length = getFrameBitLength(rxop->frame);
-      double frame_success_prob = pow(1 - ber, frame_bit_length);
+      unsigned body_bit_length = rxop->frame->getBodyBitLength();
+      double frame_success_prob = pow(1 - ber, body_bit_length);
       double p = uniform(0.0, 1.0);
 
       // 4) delivering the frame or error code

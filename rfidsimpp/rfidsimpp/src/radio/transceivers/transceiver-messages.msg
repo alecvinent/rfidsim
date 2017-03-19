@@ -14,6 +14,7 @@ class Decibel extends cObject;
 packet SendDataReq {
     simtime_t preambleDuration;
     simtime_t bodyDuration;
+    unsigned int bodyBitLength;
 }
 
 packet SendCommandReq extends SendDataReq {
@@ -67,6 +68,7 @@ packet AirFrame {
     simtime_t preambleDuration;
     simtime_t bodyDuration;
     Decibel modulationLoss;
+    unsigned int bodyBitLength;
     double bandwidth;
     // encapsualted - a command or a reply, see derived classes
 }

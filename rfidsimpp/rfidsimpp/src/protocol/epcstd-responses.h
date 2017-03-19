@@ -30,6 +30,10 @@ class TagPreamble : public omnetpp::cOwnedObject {
   bool getTRext() const { return trext_; }
   omnetpp::simtime_t getTRcal() const { return trcal_; }
 
+  omnetpp::simtime_t getSymbolDuration() const {
+    return 1.0 / getBLF(trcal_, dr_);
+  }
+
   void setTagEncoding(TagEncoding m) { m_ = m; }
   void setDivideRatio(DivideRatio dr) { dr_ = dr; }
   void setTRext(bool trext) { trext_ = trext; }

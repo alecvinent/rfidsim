@@ -13,6 +13,16 @@ class ActiveTransmitter : public Transmitter {
   virtual AirFrame *buildAirFrame(SendDataReq *request) const;
 };
 
+
+class ActiveReceiver : public Receiver {
+ public:
+  virtual ~ActiveReceiver() {}
+
+ protected:
+  virtual double getFrameSNR(AirFrame *frame, double raw_snr) const;
+  virtual RecvDataInd *buildRecvDataInd(AirFrame *frame) const;
+};
+
 }
 
 #endif

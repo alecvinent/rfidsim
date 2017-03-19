@@ -103,6 +103,7 @@ std::string ReaderAirFrame::info() const
           ", BodyDuration=" << getBodyDuration() <<
           ", ModulationLoss=" << getModulationLoss() <<
           ", Bandwidth=" << getBandwidth() <<
+          ", BodyBitLength=" << getBodyBitLength() <<
           "}";
   return ss.str();
 }
@@ -118,6 +119,7 @@ std::string TagAirFrame::info() const
           ", BodyDuration=" << getBodyDuration() <<
           ", ModulationLoss=" << getModulationLoss() <<
           ", Bandwidth=" << getBandwidth() <<
+          ", BodyBitLength=" << getBodyBitLength() <<
           "}";
   return ss.str();
 }
