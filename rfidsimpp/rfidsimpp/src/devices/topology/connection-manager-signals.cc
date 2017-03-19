@@ -10,22 +10,21 @@ Register_Class(ConnectionLost);
 const char *ConnectionCreated::NAME = "ConnectionCreated";
 const char *ConnectionLost::NAME = "ConnectionLost";
 
-inline std::string _strSignal(const char *name, int reader_id, int tag_id)
-{
-  static char buf[128];
-  snprintf(buf, sizeof(buf), "%s {ReaderID=%d, TagID=%d}", name,
-           reader_id, tag_id);
-  return buf;
-}
-
 std::string ConnectionCreated::info() const
 {
-  return _strSignal(NAME, reader_id, tag_id);
+  static char buf[256];
+  snprintf(buf, sizeof(buf),
+           "%s {ReaderID=%d, TagID=%d, Reader=<%p>, Tag=<%p>}",
+           NAME, reader_id, tag_id, reader, tag);
+  return buf;
 }
 
 std::string ConnectionLost::info() const
 {
-  return _strSignal(NAME, reader_id, tag_id);
+  static char buf[128];
+  snprintf(buf, sizeof(buf), "%s {ReaderID=%d, TagID=%d}", NAME, reader_id,
+           tag_id);
+  return buf;
 }
 
 }

@@ -10,12 +10,17 @@ class Antenna;
 
 class Medium : public omnetpp::cSimpleModule {
  public:
+  static const double SPEED_OF_LIGHT;
+
   virtual ~Medium() {}
 
   virtual Decibel getPathLoss(
           Antenna *tx_antenna, Antenna *rx_antenna) const = 0;
 
   virtual Power getThermalNoise() = 0;
+
+  omnetpp::simtime_t getPropagationDelay(
+          Antenna *tx_antenna, Antenna *rx_antenns) const;
 };
 
 

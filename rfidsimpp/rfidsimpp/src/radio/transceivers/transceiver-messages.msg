@@ -12,6 +12,8 @@ class epcstd::TagPreamble;
 class Decibel extends cObject;
 
 packet SendDataReq {
+    simtime_t preambleDuration;
+    simtime_t bodyDuration;
 }
 
 packet SendCommandReq extends SendDataReq {

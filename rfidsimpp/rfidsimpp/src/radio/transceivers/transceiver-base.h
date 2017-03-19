@@ -14,16 +14,25 @@
 
 namespace rfidsim {
 
+class Medium;
+
 class Transmitter : public omnetpp::cSimpleModule, public omnetpp::cListener {
  public:
   enum State { OFF, READY, TX };
 
-  static const char *strState(State state);
+  static const char *str(State state);
 
   static omnetpp::simsignal_t TX_START_SIGNAL_ID;
   static omnetpp::simsignal_t TX_FINISH_SIGNAL_ID;
 
   virtual ~Transmitter();
+
+  bool isOn() const { return state != OFF; }
+  bool isOff() const { return state == OFF; }
+
+  int getDeviceID() const { return device_id; }
+
+  Medium *getMedium() const { return medium; }
 
  protected:
   virtual void initialize();
@@ -36,12 +45,15 @@ class Transmitter : public omnetpp::cSimpleModule, public omnetpp::cListener {
 
   virtual void processTimeout(omnetpp::cMessage *timeout);
   virtual void processSendDataReq(SendDataReq *request);
-  virtual void processReceivedFieldOff(const ReceivedFieldOff& update);
-  virtual void processReceivedFieldOn(const ReceivedFieldOn& updated);
   virtual void processPowerOn(const PowerOn& update);
   virtual void processPowerOff(const PowerOff& update);
+  virtual void processReceivedFieldOff(const ReceivedFieldOff& update);
+  virtual void processReceivedFieldOn(const ReceivedFieldOn& updated);
+  virtual void processReceivedFieldUpdated(const ReceivedFieldUpdated& update);
   virtual void processConnectionCreated(const ConnectionCreated& update);
   virtual void processConnectionLost(const ConnectionLost& update);
+
+  virtual AirFrame *buildAirFrame(SendDataReq *request) = 0;
 
  private:
   int device_id;
@@ -50,13 +62,17 @@ class Transmitter : public omnetpp::cSimpleModule, public omnetpp::cListener {
   struct Peer {
     int device_id;
     omnetpp::cGate *radio_inp;
+    Antenna *active_antenna;
     bool enabled;
   };
   std::map<int, Peer> peers;
-
   omnetpp::cMessage *tx_timer = nullptr;  // a transmission timeout
+  Medium *medium = nullptr;
+  Antenna *active_antenna = nullptr;
 
   std::map<omnetpp::simsignal_t, omnetpp::cModule*> subscriptions;
+
+  void setState(State state);
 };
 
 
@@ -77,15 +93,15 @@ class Receiver : public omnetpp::cSimpleModule, public omnetpp::cListener {
           omnetpp::cComponent *source, omnetpp::simsignal_t signal_id,
           omnetpp::cObject *obj, omnetpp::cObject *details);
 
+  virtual void processPowerOn(const PowerOn& update);
+  virtual void processPowerOff(const PowerOff& update);
   virtual void processTimeout(omnetpp::cMessage *timeout);
   virtual void processAirFrame(AirFrame *air_frame);
   virtual void processTxStart(const TxStart& update);
   virtual void processTxFinish(const TxFinish& update);
   virtual void processReceivedFieldOff(const ReceivedFieldOff& update);
-  virtual void processReceivedFieldOn(const ReceivedFieldOn& updated);
+  virtual void processReceivedFieldOn(const ReceivedFieldOn& update);
   virtual void processReceivedFieldUpdate(const ReceivedFieldUpdated& update);
-  virtual void processPowerOn(const PowerOn& update);
-  virtual void processPowerOff(const PowerOff& update);
   virtual void processConnectionCreated(const ConnectionCreated& update);
   virtual void processConnectionLost(const ConnectionLost& update);
 

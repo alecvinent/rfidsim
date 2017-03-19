@@ -11,6 +11,8 @@ public:
 
   int reader_id = -1;
   int tag_id = -1;
+  omnetpp::cModule *reader = nullptr;
+  omnetpp::cModule *tag = nullptr;
 
   ConnectionCreated() {}
 

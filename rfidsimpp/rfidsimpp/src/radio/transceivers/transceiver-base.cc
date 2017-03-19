@@ -1,5 +1,6 @@
 #include <radio/transceivers/transceiver-base.h>
 #include <radio/antenna-base.h>
+#include <radio/medium/medium.h>
 #include <power/power-unit-base.h>
 #include <topology/connection-manager.h>
 #include <common/module-access.h>
@@ -16,7 +17,7 @@ namespace rfidsim {
 simsignal_t Transmitter::TX_START_SIGNAL_ID = registerSignal(TxStart::NAME);
 simsignal_t Transmitter::TX_FINISH_SIGNAL_ID = registerSignal(TxFinish::NAME);
 
-const char *Transmitter::strState(State state)
+const char *Transmitter::str(State state)
 {
   switch (state) {
     case OFF: return "OFF";
@@ -38,14 +39,16 @@ void Transmitter::initialize()
   state = OFF;
   peers.clear();
   tx_timer = new cMessage("Transmitter-%d-Timer");
+  medium = findChildByType<Medium>(getSystemModule());
 
   subscriptions.clear();
   auto device = findEnclosingRFIDDevice(this);
   auto sys = getSystemModule();
-  subscriptions[Antenna::RECEIVED_FIELD_OFF_SIGNAL_ID] = device;
-  subscriptions[Antenna::RECEIVED_FIELD_ON_SIGNAL_ID] = device;
   subscriptions[PowerUnit::POWER_OFF_SIGNAL_ID] = device;
   subscriptions[PowerUnit::POWER_ON_SIGNAL_ID] = device;
+  subscriptions[Antenna::RECEIVED_FIELD_OFF_SIGNAL_ID] = device;
+  subscriptions[Antenna::RECEIVED_FIELD_ON_SIGNAL_ID] = device;
+  subscriptions[Antenna::RECEIVED_FIELD_UPDATED_SIGNAL_ID] = device;
   subscriptions[ConnectionManager::CONNECTION_CREATED_SIGNAL_ID] = sys;
   subscriptions[ConnectionManager::CONNECTION_LOST_SIGNAL_ID] = sys;
   for (auto i = subscriptions.begin(); i != subscriptions.end(); ++i)
@@ -67,37 +70,37 @@ void Transmitter::receiveSignal(cComponent *source, simsignal_t signal_id,
 {
   if (signal_id == Antenna::RECEIVED_FIELD_OFF_SIGNAL_ID)
   {
-    auto signal_ = static_cast<ReceivedFieldOff*>(obj);
+    auto signal_ = check_and_cast<ReceivedFieldOff*>(obj);
     if (signal_->receiver_device_id == device_id)
       processReceivedFieldOff(*signal_);
   }
   else if (signal_id == Antenna::RECEIVED_FIELD_ON_SIGNAL_ID)
   {
-    auto signal_ = static_cast<ReceivedFieldOn*>(obj);
+    auto signal_ = check_and_cast<ReceivedFieldOn*>(obj);
     if (signal_->device_id == device_id)
       processReceivedFieldOn(*signal_);
   }
   else if (signal_id == PowerUnit::POWER_OFF_SIGNAL_ID)
   {
-    auto signal_ = static_cast<PowerOff*>(obj);
+    auto signal_ = check_and_cast<PowerOff*>(obj);
     if (signal_->device_id == device_id)
       processPowerOff(*signal_);
   }
   else if (signal_id == PowerUnit::POWER_ON_SIGNAL_ID)
   {
-    auto signal_ = static_cast<PowerOn*>(obj);
+    auto signal_ = check_and_cast<PowerOn*>(obj);
     if (signal_->device_id == device_id)
       processPowerOn(*signal_);
   }
   else if (signal_id == ConnectionManager::CONNECTION_CREATED_SIGNAL_ID)
   {
-    auto signal_ = static_cast<ConnectionCreated*>(obj);
+    auto signal_ = check_and_cast<ConnectionCreated*>(obj);
     if (signal_->reader_id == device_id || signal_->tag_id == device_id)
       processConnectionCreated(*signal_);
   }
   else if (signal_id == ConnectionManager::CONNECTION_LOST_SIGNAL_ID)
   {
-    auto signal_ = static_cast<ConnectionLost*>(obj);
+    auto signal_ = check_and_cast<ConnectionLost*>(obj);
     if (signal_->reader_id == device_id || signal_->tag_id == device_id)
       processConnectionLost(*signal_);
   }
@@ -105,42 +108,129 @@ void Transmitter::receiveSignal(cComponent *source, simsignal_t signal_id,
 
 void Transmitter::processTimeout(cMessage *timeout)
 {
-  //TODO
+  ASSERT(state == TX);
+  setState(READY);
 }
 
 void Transmitter::processSendDataReq(SendDataReq *request)
 {
-  //TODO
-}
+  if (state == READY)
+  {
+    auto frame = buildAirFrame(request);
+    for (auto i = peers.begin(); i != peers.end(); i++)
+    {
+      const Peer& peer = i->second;
+      if (peer.enabled)
+      {
+        auto delay = medium->getPropagationDelay(
+                active_antenna, peer.active_antenna);
+        sendDirect(frame->dup(), delay, 0.0, peer.radio_inp);
+      }
+    }
+    delete frame;
 
-void Transmitter::processReceivedFieldOff(const ReceivedFieldOff& update)
-{
-  //TODO
-}
+    // Change state to TX
+    setState(TX);
 
-void Transmitter::processReceivedFieldOn(const ReceivedFieldOn& updated)
-{
-  //TODO
-}
+    // Informing Receiver that the transmission started
+    TxStart signal(device_id);
+    emit(TX_START_SIGNAL_ID, &signal);
 
-void Transmitter::processPowerOn(const PowerOn& update)
-{
-  //TODO
+    // Scheduling the transmission end
+    auto duration = request->getPreambleDuration() +
+            request->getBodyDuration();
+    scheduleAt(simTime() + duration, tx_timer);
+  }
+  else
+  {
+    throw cRuntimeError("Transmitter: SendDataReq within state %s", str(state));
+  }
 }
 
 void Transmitter::processPowerOff(const PowerOff& update)
 {
-  //TODO
+  // During power off, transmission is being cancelled
+  if (state != OFF)
+  {
+    if (state == TX)
+      cancelEvent(tx_timer);
+    setState(OFF);
+  }
+}
+
+void Transmitter::processPowerOn(const PowerOn& update)
+{
+  if (state == OFF)
+    setState(READY);
+}
+
+void Transmitter::processReceivedFieldOff(const ReceivedFieldOff& update)
+{
+  // When the peer is turned off, set it with 'disabled' status
+  auto i = peers.find(update.peer_device_id);
+  if (i != peers.end())
+    i->second.enabled = true;
+}
+
+void Transmitter::processReceivedFieldOn(const ReceivedFieldOn& update)
+{
+  // When another device is turned on, and this device is a peer, set its
+  // status to 'enabled'. Devices those are not peers, are ignored.
+  auto i = peers.find(update.device_id);
+  if (i != peers.end())
+  {
+    i->second.enabled = true;
+    i->second.active_antenna = update.peer_antenna;
+  }
+}
+
+void Transmitter::processReceivedFieldUpdated(
+        const ReceivedFieldUpdated& update)
+{
+  // Upon received field update, update its antenna since it is used for
+  // delay computation.
+  auto i = peers.find(update.device_id);
+  if (i != peers.end())
+  {
+    i->second.enabled = true; // power update may be received after connection
+                              // created, so enable the peer anyway
+    i->second.active_antenna = update.peer_antenna;
+  }
 }
 
 void Transmitter::processConnectionCreated(const ConnectionCreated& update)
 {
-  //TODO
+  int peer_id;
+  omnetpp::cModule *peer = nullptr;
+  if (device_id == update.reader_id)
+  {
+    peer_id = update.tag_id;
+    peer = update.tag;
+  }
+  else
+  {
+    ASSERT(device_id == update.tag_id);
+    peer_id = update.reader_id;
+    peer = update.reader;
+  }
+  auto radio_inp = peer->gate("radioInp");
+
+  // Since active antenna will be known after peer power update/on, leave
+  // it as nullptr and set peer to disabled state until then
+  Peer record = {peer_id, radio_inp, nullptr, false};
+  peers[peer_id] = record;
 }
 
 void Transmitter::processConnectionLost(const ConnectionLost& update)
 {
-  //TODO
+  int peer_id = update.reader_id == device_id ? update.tag_id :
+          update.reader_id;
+  peers.erase(peer_id);
+}
+
+void Transmitter::setState(State state)
+{
+  this->state = state;
 }
 
 
