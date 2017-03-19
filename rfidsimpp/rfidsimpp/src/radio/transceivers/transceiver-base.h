@@ -69,7 +69,6 @@ class Transmitter : public omnetpp::cSimpleModule, public omnetpp::cListener {
   omnetpp::cMessage *tx_timer = nullptr;  // a transmission timeout
   Medium *medium = nullptr;
   Antenna *active_antenna = nullptr;
-
   std::map<omnetpp::simsignal_t, omnetpp::cModule*> subscriptions;
 
   void setState(State state);
@@ -79,10 +78,14 @@ class Transmitter : public omnetpp::cSimpleModule, public omnetpp::cListener {
 class Receiver : public omnetpp::cSimpleModule, public omnetpp::cListener {
  public:
   enum State { OFF, READY, RX, TX };
+  static const char *str(State state);
 
   virtual ~Receiver();
 
-  ChannelModel *getChannelModel() const;
+  omnetpp::cGate *getPhyOut() { return gate("phyOut"); }
+
+  ChannelModel *getChannelModel() const { return channel; }
+  Medium *getMedium() const { return medium; }
 
  protected:
   virtual void initialize();
@@ -101,17 +104,56 @@ class Receiver : public omnetpp::cSimpleModule, public omnetpp::cListener {
   virtual void processTxFinish(const TxFinish& update);
   virtual void processReceivedFieldOff(const ReceivedFieldOff& update);
   virtual void processReceivedFieldOn(const ReceivedFieldOn& update);
-  virtual void processReceivedFieldUpdate(const ReceivedFieldUpdated& update);
+  virtual void processReceivedFieldUpdated(const ReceivedFieldUpdated& update);
   virtual void processConnectionCreated(const ConnectionCreated& update);
   virtual void processConnectionLost(const ConnectionLost& update);
 
+  /** Returns SNR with respect to frame encoding, preamble length, etc.
+   * The `raw_snr` parameter indicates basic signal-to-noise ratio, computed
+   * from the received power and doesn't take into account frame details.
+   * For the basic implementation, can return `raw_snr` (e.g. for passive
+   * receivers).
+   */
+  virtual double getFrameSNR(AirFrame *frame, double raw_snr) const = 0;
+
+  virtual unsigned getFrameBitLength(AirFrame *frame) const = 0;
+
+  virtual RecvDataInd *buildRecvDataInd(AirFrame *frame) const = 0;
+
  private:
   int device_id;
+
   State state;
-
   ChannelModel *channel = nullptr;
-
+  Medium *medium = nullptr;
   std::map<omnetpp::simsignal_t, omnetpp::cModule*> subscriptions;
+
+  struct Peer {
+    int device_id;
+    Power power;
+  };
+  std::map<int, Peer> peers;
+
+  struct RxRecord {
+    unsigned long rxop_index = 0;
+    int peer_id = -1;
+    AirFrame *frame = nullptr;
+    Power min_power = Power::ZERO;
+    Power max_power = Power::ZERO;
+    Power noise = Power::ZERO;
+    omnetpp::cMessage *timer = nullptr;
+    omnetpp::simtime_t started_at = omnetpp::SimTime::ZERO;
+    bool broken = false;
+  };
+
+  std::map<int, RxRecord*> rxops_by_peer;
+  std::map<omnetpp::cMessage*, RxRecord*> rxops_by_timer;
+  std::set<RxRecord*> rxops;
+  unsigned long next_rxop_index = 0;
+
+  void setState(State state);
+  void updatePeerPower(int peer_id, const Power& power);
+  int getPeerID(int reader_id, int tag_id);
 };
 
 

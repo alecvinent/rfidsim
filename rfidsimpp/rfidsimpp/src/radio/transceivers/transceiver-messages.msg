@@ -59,6 +59,7 @@ packet RecvErrorInd {
 
 
 packet AirFrame {
+    int deviceID;
     simtime_t preambleDuration;
     simtime_t bodyDuration;
     Decibel modulationLoss;
