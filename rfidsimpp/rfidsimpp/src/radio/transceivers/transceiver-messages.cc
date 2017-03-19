@@ -20,6 +20,8 @@ Register_Class(RecvBeginInd);
 Register_Class(RecvCommandInd);
 Register_Class(RecvReplyInd);
 Register_Class(RecvErrorInd);
+Register_Class(ReaderAirFrame);
+Register_Class(TagAirFrame);
 
 const char *SendCommandReq::NAME = "SendCommandReq";
 const char *SendReplyReq::NAME = "SendReplyReq";
@@ -27,22 +29,28 @@ const char *RecvBeginInd::NAME = "RecvBeginInd";
 const char *RecvCommandInd::NAME = "RecvCommandInd";
 const char *RecvReplyInd::NAME = "RecvReplyInd";
 const char *RecvErrorInd::NAME = "RecvErrorInd";
+const char *ReaderAirFrame::NAME = "ReaderAirFrame";
+const char *TagAirFrame::NAME = "TagAirFrame";
 
 std::string SendCommandReq::info() const
 {
-  auto cmd = getEncapsulatedPacket();
+  auto kind = static_cast<epcstd::CommandKind>(getCommandKind());
   std::stringstream ss;
-  ss << NAME << " {" << "preamble:" << getPreamble().info() << ", command:" <<
-          (cmd ? cmd->info() : "(none)") << "}";
+  ss << NAME << " {" <<
+          "Command=" << epcstd::str(kind) <<
+          ", Preamble=" << getPreamble().info() <<
+          "}";
   return ss.str();
 }
 
 std::string SendReplyReq::info() const
 {
-  auto reply = getEncapsulatedPacket();
+  auto kind = static_cast<epcstd::ReplyKind>(getReplyKind());
   std::stringstream ss;
-  ss << NAME << " {" << "preamble:" << getPreamble().info() << ", command:" <<
-          (reply ? reply->info() : "(none)") << "}";
+  ss << NAME << " {" <<
+          "Reply=" << epcstd::str(kind) <<
+          ", Preamble=" << getPreamble().info() <<
+          "}";
   return ss.str();
 }
 
@@ -55,19 +63,23 @@ std::string RecvBeginInd::info() const
 
 std::string RecvCommandInd::info() const
 {
-  auto cmd = getEncapsulatedPacket();
+  auto kind = static_cast<epcstd::CommandKind>(getCommandKind());
   std::stringstream ss;
-  ss << NAME << " {" << "preamble:" << getPreamble().info() << ", command:" <<
-          (cmd ? cmd->info() : "(none)") << "}";
+  ss << NAME << " {" <<
+          "Command=" << epcstd::str(kind) <<
+          ", Preamble=" << getPreamble().info() <<
+          "}";
   return ss.str();
 }
 
 std::string RecvReplyInd::info() const
 {
-  auto reply = getEncapsulatedPacket();
+  auto kind = static_cast<epcstd::ReplyKind>(getReplyKind());
   std::stringstream ss;
-  ss << NAME << " {" << "preamble:" << getPreamble().info() << ", command:" <<
-          (reply ? reply->info() : "(none)") << "}";
+  ss << NAME << " {" <<
+          "Reply=" << epcstd::str(kind) <<
+          ", Preamble=" << getPreamble().info() <<
+          "}";
   return ss.str();
 }
 
@@ -75,8 +87,38 @@ std::string RecvErrorInd::info() const
 {
   std::stringstream ss;
   ss << NAME << " {"
-          << "error=" << strRecvErrorType(static_cast<RecvErrorType>(getType()))
+          << "Error=" << strRecvErrorType(static_cast<RecvErrorType>(getType()))
           << "}";
+  return ss.str();
+}
+
+std::string ReaderAirFrame::info() const
+{
+  auto kind = static_cast<epcstd::CommandKind>(getCommandKind());
+  std::stringstream ss;
+  ss << NAME << " {" <<
+          "Command=" << epcstd::str(kind) <<
+          ", DeviceID=" << getDeviceID() <<
+          ", PreambleDuration=" << getPreambleDuration() <<
+          ", BodyDuration=" << getBodyDuration() <<
+          ", ModulationLoss=" << getModulationLoss() <<
+          ", Bandwidth=" << getBandwidth() <<
+          "}";
+  return ss.str();
+}
+
+std::string TagAirFrame::info() const
+{
+  auto kind = static_cast<epcstd::ReplyKind>(getReplyKind());
+  std::stringstream ss;
+  ss << NAME << " {" <<
+          "Reply=" << epcstd::str(kind) <<
+          ", DeviceID=" << getDeviceID() <<
+          ", PreambleDuration=" << getPreambleDuration() <<
+          ", BodyDuration=" << getBodyDuration() <<
+          ", ModulationLoss=" << getModulationLoss() <<
+          ", Bandwidth=" << getBandwidth() <<
+          "}";
   return ss.str();
 }
 

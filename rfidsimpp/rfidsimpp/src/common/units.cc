@@ -103,5 +103,17 @@ std::string Power::toString(Unit unit, bool adjust_scale) const {
   return buf;
 }
 
+std::ostream& operator<<(std::ostream& os, const Decibel& value)
+{
+  os << value.info();
+  return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const Power& value)
+{
+  os << value.info();
+  return os;
+}
+
 
 }

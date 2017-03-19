@@ -31,6 +31,7 @@ class Transmitter : public omnetpp::cSimpleModule, public omnetpp::cListener {
   bool isOff() const { return state == OFF; }
 
   int getDeviceID() const { return device_id; }
+  double getBandwidth() const { return bandwidth; }
 
   Medium *getMedium() const { return medium; }
 
@@ -53,10 +54,11 @@ class Transmitter : public omnetpp::cSimpleModule, public omnetpp::cListener {
   virtual void processConnectionCreated(const ConnectionCreated& update);
   virtual void processConnectionLost(const ConnectionLost& update);
 
-  virtual AirFrame *buildAirFrame(SendDataReq *request) = 0;
+  virtual AirFrame *buildAirFrame(SendDataReq *request) const = 0;
 
  private:
   int device_id;
+  double bandwidth;
   State state;
 
   struct Peer {
@@ -86,6 +88,8 @@ class Receiver : public omnetpp::cSimpleModule, public omnetpp::cListener {
 
   ChannelModel *getChannelModel() const { return channel; }
   Medium *getMedium() const { return medium; }
+
+  int getDeviceID() const { return device_id; }
 
  protected:
   virtual void initialize();

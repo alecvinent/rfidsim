@@ -115,6 +115,42 @@ class RecvErrorInd : public RecvErrorInd_Base {
   virtual std::string info() const;
 };
 
+class ReaderAirFrame : public ReaderAirFrame_Base {
+ public:
+  static const char *NAME;
+
+  ReaderAirFrame() : ReaderAirFrame_Base(NAME) {}
+  ReaderAirFrame(const ReaderAirFrame& other) : ReaderAirFrame_Base(other) {}
+  virtual ~ReaderAirFrame() {}
+
+  virtual ReaderAirFrame *dup() const { return new ReaderAirFrame(*this); }
+
+  ReaderAirFrame& operator=(const ReaderAirFrame& rside) {
+    ReaderAirFrame_Base::operator=(rside);
+    return *this;
+  }
+
+  virtual std::string info() const;
+};
+
+class TagAirFrame : public TagAirFrame_Base {
+ public:
+  static const char *NAME;
+
+  TagAirFrame() : TagAirFrame_Base(NAME) {}
+  TagAirFrame(const TagAirFrame& other) : TagAirFrame_Base(other) {}
+  virtual ~TagAirFrame() {}
+
+  virtual TagAirFrame *dup() const { return new TagAirFrame(*this); }
+
+  TagAirFrame& operator=(const TagAirFrame& rside) {
+    TagAirFrame_Base::operator=(rside);
+    return *this;
+  }
+
+  virtual std::string info() const;
+};
+
 }
 
 #endif

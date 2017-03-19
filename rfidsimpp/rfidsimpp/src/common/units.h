@@ -178,6 +178,9 @@ private:
   }
 };
 
+std::ostream& operator<<(std::ostream& os, const Decibel& value);
+std::ostream& operator<<(std::ostream& os, const Power& value);
+
 }
 
 #endif

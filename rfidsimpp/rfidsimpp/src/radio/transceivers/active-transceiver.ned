@@ -15,6 +15,7 @@ simple ActiveTransmitter like ITransmitter {
         @signal[TxStart](type=rfidsim::TxStart);
         @signal[TxFinish](type=rfidsim::TxFinish);
         int deviceID;
+        double bandwidth @unit(Hz) = default(1.2e6Hz);
     gates:
         input phyInp;
 }

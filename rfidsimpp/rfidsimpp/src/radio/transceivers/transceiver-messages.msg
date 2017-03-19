@@ -18,12 +18,14 @@ packet SendDataReq {
 
 packet SendCommandReq extends SendDataReq {
     @customize(true);
+    int commandKind;
     epcstd::ReaderPreamble preamble;
     // encapsulated - a Command
 }
 
 packet SendReplyReq extends SendDataReq {
     @customize(true);
+    int replyKind;
     epcstd::TagPreamble preamble;
     // encapsulated - a Response
 }
@@ -37,12 +39,14 @@ packet RecvDataInd {
 
 packet RecvReplyInd extends RecvDataInd {
     @customize(true);
+    int replyKind;
     epcstd::TagPreamble preamble;
     // encapsulated - a Response
 }
 
 packet RecvCommandInd extends RecvDataInd {
     @customize(true);
+    int commandKind;
     epcstd::ReaderPreamble preamble;
     // encapsulated - a Command
 }
@@ -69,12 +73,14 @@ packet AirFrame {
 
 packet ReaderAirFrame extends AirFrame {
     @customize(true);
+    int commandKind;
     epcstd::ReaderPreamble preamble;
     // encapsulated - a command
 }
 
 packet TagAirFrame extends AirFrame {
     @customize(true);
+    int replyKind;
     epcstd::TagPreamble preamble;
     // encapsulated - a reply
 }

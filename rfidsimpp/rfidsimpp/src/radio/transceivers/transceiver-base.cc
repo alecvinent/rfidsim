@@ -36,6 +36,8 @@ Transmitter::~Transmitter()
 void Transmitter::initialize()
 {
   device_id = static_cast<int>(par("deviceID").longValue());
+  bandwidth = par("bandwidth").doubleValue();
+
   state = OFF;
   peers.clear();
   tx_timer = new cMessage("Transmitter-%d-Timer");
@@ -128,6 +130,7 @@ void Transmitter::processSendDataReq(SendDataReq *request)
       }
     }
     delete frame;
+    delete request;
 
     // Change state to TX
     setState(TX);
