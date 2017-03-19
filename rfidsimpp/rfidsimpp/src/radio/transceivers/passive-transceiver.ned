@@ -16,6 +16,7 @@ simple PassiveTransmitter like ITransmitter {
         @signal[TxFinish](type=rfidsim::TxFinish);
         int deviceID;
         double bandwidth @unit(Hz) = default(1.2e6Hz);
+        double modulationLoss @unit(dB) = default(-3dB);
     gates:
         input phyInp;
 }
