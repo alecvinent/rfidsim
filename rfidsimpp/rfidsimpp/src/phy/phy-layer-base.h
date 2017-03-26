@@ -14,8 +14,13 @@ class PhyLayer : public omnetpp::cSimpleModule, public omnetpp::cListener {
  public:
   virtual ~PhyLayer();
 
-  bool isOn() const { return powered; }
-  bool isOff() const { return !powered; }
+  omnetpp::cGate *getLogicOut() { return gate("logicOut"); }
+  omnetpp::cGate *getRadioOut() { return gate("radioOut"); }
+
+  virtual bool isOn() const = 0;
+  virtual bool isOff() const = 0;
+
+  int getDeviceID() const { return device_id; }
 
  protected:
   virtual void initialize();
@@ -34,7 +39,6 @@ class PhyLayer : public omnetpp::cSimpleModule, public omnetpp::cListener {
   virtual void processRecvErrorInd(RecvErrorInd *msg) = 0;
 
  private:
-  bool powered = false;
   int device_id = -1;
   std::map<omnetpp::simsignal_t, omnetpp::cModule*> subscriptions;
 };

@@ -1,5 +1,5 @@
 cplusplus {{
-#include <protocol/epcstd-data-types.h>
+#include <protocol/epcstd-base.h>
 #include <cstdint>
 }}
 

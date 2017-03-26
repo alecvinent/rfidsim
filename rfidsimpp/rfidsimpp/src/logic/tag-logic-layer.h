@@ -1,8 +1,8 @@
 #ifndef RFIDSIMPP_LOGIC_TAG_LOGIC_LAYER_H_
 #define RFIDSIMPP_LOGIC_TAG_LOGIC_LAYER_H_
 
+#include <protocol/epcstd-base.h>
 #include <logic/logic-layer-base.h>
-#include <protocol/epcstd-data-types.h>
 
 namespace rfidsim {
 

@@ -2,7 +2,7 @@
 #define RFIDSIMPP_PROTOCOL_EPCSTD_COMMAND_ENCODER_H_
 
 #include <omnetpp.h>
-#include <protocol/epcstd-data-types.h>
+#include <protocol/epcstd-base.h>
 #include <protocol/epcstd-commands.h>
 
 namespace rfidsim {

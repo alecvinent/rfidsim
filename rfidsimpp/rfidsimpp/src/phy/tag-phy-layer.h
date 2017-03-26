@@ -11,6 +11,9 @@ class TagPhyLayer : public PhyLayer {
  public:
   virtual ~TagPhyLayer();
 
+  virtual bool isOn() const { return true; } //TODO
+  virtual bool isOff() const { return true; } //TODO
+
  protected:
   virtual void initialize();
   virtual void handleMessage(omnetpp::cMessage *msg);

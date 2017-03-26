@@ -7,8 +7,8 @@ simple Phy {
     gates:
         input logicInp;
         output logicOut;
-        input transceiverInp;
-        output transceiverOut;
+        input radioInp;
+        output radioOut;
 }
 
 simple ReaderPhy extends Phy {
@@ -17,7 +17,8 @@ simple ReaderPhy extends Phy {
         double delimiter @unit(s);
         double tari @unit(s);
         double rtcal @unit(s);
-        double trcal @unit(s);        
+        double trcal @unit(s); 
+        double frt;       
 }
 
 simple TagPhy extends Phy {

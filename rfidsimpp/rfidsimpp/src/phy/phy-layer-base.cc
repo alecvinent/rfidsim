@@ -14,7 +14,6 @@ PhyLayer::~PhyLayer()
 
 void PhyLayer::initialize()
 {
-  powered = false;
   device_id = static_cast<int>(par("deviceID").longValue());
 
   auto device = getEnclosingRFIDDevice(this);
@@ -23,8 +22,6 @@ void PhyLayer::initialize()
   subscriptions[PowerUnit::POWER_ON_SIGNAL_ID] = device;
   for (auto i = subscriptions.begin(); i != subscriptions.end(); ++i)
     i->second->subscribe(i->first, this);
-
-  WATCH(powered);
 }
 
 void PhyLayer::handleMessage(cMessage *msg)
@@ -41,26 +38,20 @@ void PhyLayer::handleMessage(cMessage *msg)
     throw cRuntimeError("unexpected message '%s'", msg->getFullName());
 }
 
-void PhyLayer::receiveSignal(cComponent *source, simsignal_t signal_id, cObject *obj,
-                        cObject *details)
+void PhyLayer::receiveSignal(cComponent *source, simsignal_t signal_id,
+                             cObject *obj, cObject *details)
 {
   if (signal_id == PowerUnit::POWER_OFF_SIGNAL_ID)
   {
     auto signal = static_cast<PowerOff*>(obj);
-    if (signal->device_id == device_id && powered)
-    {
-      powered = false;
+    if (signal->device_id == device_id)
       processPowerOff(*signal);
-    }
   }
   else if (signal_id == PowerUnit::POWER_ON_SIGNAL_ID)
   {
     auto signal = static_cast<PowerOn*>(obj);
-    if (signal->device_id == device_id && !powered)
-    {
-      powered = true;
+    if (signal->device_id == device_id)
       processPowerOn(*signal);
-    }
   }
 }
 
