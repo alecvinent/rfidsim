@@ -5,6 +5,8 @@
 #include <phy/phy-layer-base.h>
 #include <radio/transceivers/transceiver-signals.h>
 
+#define MAX_COMMAND_BITLEN  120
+
 namespace rfidsim {
 
 class ReaderPhyLayer : public PhyLayer {

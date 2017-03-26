@@ -47,28 +47,14 @@ unsigned encodeValueEBV(unsigned value, char *buf, unsigned offset,
 unsigned getCRC16(char *buf, unsigned offset, unsigned buf_size);
 unsigned getCRC5(char *buf, unsigned offset, unsigned buf_size);
 
+unsigned encode(Command *cmd, char *buf, unsigned size);
+unsigned encodeQuery(Query *cmd, char *buf, unsigned size);
+unsigned encodeQueryRep(QueryRep *cmd, char *buf, unsigned size);
+unsigned encodeACK(Ack *cmd, char *buf, unsigned size);
+unsigned encodeReqRN(ReqRN *cmd, char *buf, unsigned size);
+unsigned encodeRead(Read *cmd, char *buf, unsigned size);
 
-class CommandEncoder {
- public:
-  static const unsigned DEFAULT_BUFFER_SIZE;
-
-  CommandEncoder(unsigned buffer_size = DEFAULT_BUFFER_SIZE);
-  virtual ~CommandEncoder();
-
-  void encode(Command *cmd);
-  const char *getEncodedString() const;
-  unsigned getBitLength() const;
- private:
-  unsigned offset = 0;
-  unsigned buf_size = 0;
-  char *buf = nullptr;
-
-  void encodeQuery(Query *cmd);
-  void encodeQueryRep(QueryRep *cmd);
-  void encodeACK(Ack *cmd);
-  void encodeReqRN(ReqRN *cmd);
-  void encodeRead(Read *cmd);
-};
+unsigned countBits(const char *buf, unsigned *n_zeros, unsigned *n_ones);
 
 }}
 

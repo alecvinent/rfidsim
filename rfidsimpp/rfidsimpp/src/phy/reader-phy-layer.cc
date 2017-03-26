@@ -2,6 +2,7 @@
 #include <radio/transceivers/transceiver-base.h>
 #include <common/module-access.h>
 #include <protocol/epcstd-base.h>
+#include <protocol/epcstd-command-encoder.h>
 
 using namespace omnetpp;
 
@@ -101,6 +102,12 @@ void ReaderPhyLayer::processTxFinish(const TxFinish& signal)
     scheduleAt(simTime() + t1 + t3, timer);
     setState(WAIT_RESP_IR);
   }
+  else if (state == TX_NR)
+  {
+    auto t4 = link_timing.getMinT(4);
+    scheduleAt(simTime() + t4, timer);
+    setState(WAIT_READY_NR);
+  }
   else if (state != OFF)
   {
     throw cRuntimeError("unexpected TxFinish in state %s", str(state));
@@ -185,6 +192,11 @@ void ReaderPhyLayer::processCommand(epcstd::Command *msg)
 {
   if (state == READY)
   {
+    epcstd::ReaderPreamble preamble;
+    preamble.setDelim(delimiter);
+    preamble.setTari(tari);
+    preamble.setRTcal(rtcal);
+
     if (msg->getKind() == epcstd::KIND_COMMAND_QUERY)
     {
       auto query = static_cast<epcstd::Query*>(msg);
@@ -192,9 +204,33 @@ void ReaderPhyLayer::processCommand(epcstd::Command *msg)
       auto blf = epcstd::getBLF(trcal, dr);
       auto t_pri = epcstd::getTpri(blf);
       link_timing.setTpri(t_pri);
+
+      preamble.setTRcal(trcal);
+      preamble.setType(epcstd::ReaderPreamble::PREAMBLE);
     }
+    else
+    {
+      preamble.setType(epcstd::ReaderPreamble::SYNC);
+    }
+
+    // Encoding command
+    char buf[MAX_COMMAND_BITLEN];
+    buf[MAX_COMMAND_BITLEN - 1] = '\0';
+    unsigned body_bitlen = epcstd::encode(msg, buf, MAX_COMMAND_BITLEN - 1);
+
+    unsigned n0s = 0;
+    unsigned n1s = 0;
+    epcstd::countBits(buf, &n0s, &n1s);
+    auto body_duration = n0s * preamble.getData0() + n1s * preamble.getData1();
+
     auto req = new SendCommandReq;
+    req->setPreamble(preamble);
+    req->setPreambleDuration(preamble.getDuration());
+    req->setBodyDuration(body_duration);
+    req->setBodyBitLength(body_bitlen);
+    req->setCommandKind(msg->getKind());
     req->encapsulate(msg);
+
     send(req, getRadioOut());
   }
   else

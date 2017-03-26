@@ -168,108 +168,115 @@ unsigned getCRC5(char *buf, unsigned offset, unsigned buf_size)
 
 //
 //===========================================================================
-// CommandEncoder
+// Commands encoding
 //===========================================================================
 //
-const unsigned CommandEncoder::DEFAULT_BUFFER_SIZE = 1024;
-
-CommandEncoder::CommandEncoder(unsigned buffer_size)
-: offset(0), buf_size(buffer_size)
-{
-  buf = new char[buffer_size];
-  buf[0] = '\0';
-}
-
-CommandEncoder::~CommandEncoder()
-{
-  delete[] buf;
-}
-
-void CommandEncoder::encode(Command *cmd)
+unsigned encode(Command *cmd, char *buf, unsigned size)
 {
   if (!cmd) throw cRuntimeError("cmd=<%p>", cmd);
+  if (!buf) throw cRuntimeError("buf=<%p>", buf);
+  if (size == 0) throw cRuntimeError("buffer size=%u passed", size);
 
   buf[0] = '\0';
-  offset = 0;
 
   auto kind = cmd->getKind();
   if (kind == KIND_COMMAND_QUERY)
-    encodeQuery(check_and_cast<Query*>(cmd));
+    return encodeQuery(check_and_cast<Query*>(cmd), buf, size);
   else if (kind == KIND_COMMAND_QUERY_REP)
-    encodeQueryRep(check_and_cast<QueryRep*>(cmd));
+    return encodeQueryRep(check_and_cast<QueryRep*>(cmd), buf, size);
   else if (kind == KIND_COMMAND_ACK)
-    encodeACK(check_and_cast<Ack*>(cmd));
+    return encodeACK(check_and_cast<Ack*>(cmd), buf, size);
   else if (kind == KIND_COMMAND_REQ_RN)
-    encodeReqRN(check_and_cast<ReqRN*>(cmd));
+    return encodeReqRN(check_and_cast<ReqRN*>(cmd), buf, size);
   else if (kind == KIND_COMMAND_READ)
-    encodeRead(check_and_cast<Read*>(cmd));
+    return encodeRead(check_and_cast<Read*>(cmd), buf, size);
   else
     throw cRuntimeError("unsupported command kind = %d", kind);
 }
 
-const char *CommandEncoder::getEncodedString() const
+unsigned encodeQuery(Query *cmd, char *buf, unsigned size)
 {
-  return buf;
-}
-
-unsigned CommandEncoder::getBitLength() const
-{
+  unsigned offset = 0;
+  offset += encodeCommandCode(COMMAND_QUERY, buf, offset, size);
+  offset += encodeField(static_cast<DivideRatio>(cmd->getDR()), COMMAND_QUERY,
+                       buf, offset, size);
+  offset += encodeField(static_cast<TagEncoding>(cmd->getM()), COMMAND_QUERY,
+                        buf, offset, size);
+  offset += encodeValue(cmd->getTRext(), buf, offset, size);
+  offset += encodeField(static_cast<Sel>(cmd->getSel()), COMMAND_QUERY, buf,
+                        offset, size);
+  offset += encodeField(static_cast<Session>(cmd->getSession()), COMMAND_QUERY,
+                        buf, offset, size);
+  offset += encodeField(static_cast<InventoryFlag>(cmd->getTarget()),
+                        COMMAND_QUERY, buf, offset, size);
+  offset += encodeValue(cmd->getQ(), 4, buf, offset, size);
+  unsigned crc = getCRC5(buf, 0, offset);
+  cmd->setCRC5(crc);
+  offset += encodeValue(crc, 5, buf, offset, size);
   return offset;
 }
 
-void CommandEncoder::encodeQuery(Query *cmd)
+unsigned encodeQueryRep(QueryRep *cmd, char *buf, unsigned size)
 {
-  offset += encodeCommandCode(COMMAND_QUERY, buf, offset, buf_size);
-  offset += encodeField(static_cast<DivideRatio>(cmd->getDR()), COMMAND_QUERY,
-                       buf, offset, buf_size);
-  offset += encodeField(static_cast<TagEncoding>(cmd->getM()), COMMAND_QUERY,
-                        buf, offset, buf_size);
-  offset += encodeValue(cmd->getTRext(), buf, offset, buf_size);
-  offset += encodeField(static_cast<Sel>(cmd->getSel()), COMMAND_QUERY, buf,
-                        offset, buf_size);
-  offset += encodeField(static_cast<Session>(cmd->getSession()), COMMAND_QUERY,
-                        buf, offset, buf_size);
-  offset += encodeField(static_cast<InventoryFlag>(cmd->getTarget()),
-                        COMMAND_QUERY, buf, offset, buf_size);
-  offset += encodeValue(cmd->getQ(), 4, buf, offset, buf_size);
-  unsigned crc = getCRC5(buf, 0, offset);
-  cmd->setCRC5(crc);
-  offset += encodeValue(crc, 5, buf, offset, buf_size);
-}
-
-void CommandEncoder::encodeQueryRep(QueryRep *cmd)
-{
-  offset += encodeCommandCode(COMMAND_QUERY_REP, buf, offset, buf_size);
+  unsigned offset = 0;
+  offset += encodeCommandCode(COMMAND_QUERY_REP, buf, offset, size);
   offset += encodeField(static_cast<Session>(cmd->getSession()),
-                        COMMAND_QUERY_REP, buf, offset, buf_size);
+                        COMMAND_QUERY_REP, buf, offset, size);
+  return offset;
 }
 
-void CommandEncoder::encodeACK(Ack *cmd)
+unsigned encodeACK(Ack *cmd, char *buf, unsigned size)
 {
-  offset += encodeCommandCode(COMMAND_ACK, buf, offset, buf_size);
-  offset += encodeValue(cmd->getRN(), 16, buf, offset, buf_size);
+  unsigned offset = 0;
+  offset += encodeCommandCode(COMMAND_ACK, buf, offset, size);
+  offset += encodeValue(cmd->getRN(), 16, buf, offset, size);
+  return offset;
 }
 
-void CommandEncoder::encodeReqRN(ReqRN *cmd)
+unsigned encodeReqRN(ReqRN *cmd, char *buf, unsigned size)
 {
-  offset += encodeCommandCode(COMMAND_REQ_RN, buf, offset, buf_size);
-  offset += encodeValue(cmd->getRN(), 16, buf, offset, buf_size);
+  unsigned offset = 0;
+  offset += encodeCommandCode(COMMAND_REQ_RN, buf, offset, size);
+  offset += encodeValue(cmd->getRN(), 16, buf, offset, size);
   unsigned crc = getCRC16(buf, 0, offset);
   cmd->setCRC16(crc);
-  offset += encodeValue(crc, 16, buf, offset, buf_size);
+  offset += encodeValue(crc, 16, buf, offset, size);
+  return offset;
 }
 
-void CommandEncoder::encodeRead(Read *cmd)
+unsigned encodeRead(Read *cmd, char *buf, unsigned size)
 {
-  offset += encodeCommandCode(COMMAND_READ, buf, offset, buf_size);
+  unsigned offset = 0;
+  offset += encodeCommandCode(COMMAND_READ, buf, offset, size);
   offset += encodeField(static_cast<MemoryBank>(cmd->getBank()), COMMAND_READ,
-                        buf, offset, buf_size);
-  offset += encodeValueEBV(cmd->getWordPtr(), buf, offset, buf_size);
-  offset += encodeValue(cmd->getWordCount(), 8, buf, offset, buf_size);
-  offset += encodeValue(cmd->getRN(), 16, buf, offset, buf_size);
+                        buf, offset, size);
+  offset += encodeValueEBV(cmd->getWordPtr(), buf, offset, size);
+  offset += encodeValue(cmd->getWordCount(), 8, buf, offset, size);
+  offset += encodeValue(cmd->getRN(), 16, buf, offset, size);
   unsigned crc = getCRC16(buf, 0, offset);
   cmd->setCRC16(crc);
-  offset += encodeValue(crc, 16, buf, offset, buf_size);
+  offset += encodeValue(crc, 16, buf, offset, size);
+  return offset;
+}
+
+unsigned countBits(const char *buf, unsigned *n_zeros, unsigned *n_ones)
+{
+  unsigned n0s = 0;
+  unsigned n1s = 0;
+  unsigned bitlen = strlen(buf);
+  for (unsigned i = 0; i < bitlen; ++i)
+  {
+    char b = buf[i];
+    if (b == '0')
+      n0s += 1;
+    else if (b == '1')
+      n1s += 1;
+    else
+      throw cRuntimeError("bit string '%s' contains ill symbol '%c'", buf, b);
+  }
+  if (n_zeros) *n_zeros = n0s;
+  if (n_ones) *n_ones = n1s;
+  return bitlen;
 }
 
 }}
