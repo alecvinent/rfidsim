@@ -2,6 +2,7 @@
 #define RFIDSIMPP_LOGIC_READER_LOGIC_LAYER_H_
 
 #include <logic/logic-layer-base.h>
+#include <phy/phy-layer-messages.h>
 
 namespace rfidsim {
 
@@ -39,6 +40,7 @@ class ReaderLogicLayer : public LogicLayer {
   virtual void processAckReply(epcstd::AckReply *msg);
   virtual void processReqRNReply(epcstd::ReqRNReply *msg);
   virtual void processReadReply(epcstd::ReadReply *msg);
+  virtual void processPhyError(PhyDataConfStatus error);
 
  private:
   unsigned q;

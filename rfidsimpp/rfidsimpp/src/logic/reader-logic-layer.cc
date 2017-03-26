@@ -41,19 +41,30 @@ void ReaderLogicLayer::initialize()
 
 void ReaderLogicLayer::handleMessage(cMessage *msg)
 {
-  if (dynamic_cast<epcstd::Reply*>(msg))
+  if (dynamic_cast<PhyDataConf*>(msg))
   {
-    auto kind = msg->getKind();
-    if (kind == epcstd::KIND_QUERY_REPLY)
-      processQueryReply(check_and_cast<epcstd::QueryReply*>(msg));
-    else if (kind == epcstd::KIND_ACK_REPLY)
-      processAckReply(check_and_cast<epcstd::AckReply*>(msg));
-    else if (kind == epcstd::KIND_REQ_RN_REPLY)
-      processReqRNReply(check_and_cast<epcstd::ReqRNReply*>(msg));
-    else if (kind == epcstd::KIND_READ_REPLY)
-      processReadReply(check_and_cast<epcstd::ReadReply*>(msg));
+    auto conf = static_cast<PhyDataConf*>(msg);
+    auto status = static_cast<PhyDataConfStatus>(conf->getStatus());
+    if (status == PHY_DATA_CONF_OK)
+    {
+      auto reply = conf->decapsulate();
+      auto kind = reply->getKind();
+      if (kind == epcstd::KIND_QUERY_REPLY)
+        processQueryReply(check_and_cast<epcstd::QueryReply*>(reply));
+      else if (kind == epcstd::KIND_ACK_REPLY)
+        processAckReply(check_and_cast<epcstd::AckReply*>(reply));
+      else if (kind == epcstd::KIND_REQ_RN_REPLY)
+        processReqRNReply(check_and_cast<epcstd::ReqRNReply*>(reply));
+      else if (kind == epcstd::KIND_READ_REPLY)
+        processReadReply(check_and_cast<epcstd::ReadReply*>(reply));
+      else
+        throw cRuntimeError("unsupported epcstd::Reply kind = %d", kind);
+    }
     else
-      throw cRuntimeError("unsupported epcstd::Reply kind = %d", kind);
+    {
+      processPhyError(status);
+    }
+    delete msg;
   }
   else
   {
@@ -92,6 +103,11 @@ void ReaderLogicLayer::processReqRNReply(epcstd::ReqRNReply *msg)
 }
 
 void ReaderLogicLayer::processReadReply(epcstd::ReadReply *msg)
+{
+  //TODO
+}
+
+void ReaderLogicLayer::processPhyError(PhyDataConfStatus error)
 {
   //TODO
 }

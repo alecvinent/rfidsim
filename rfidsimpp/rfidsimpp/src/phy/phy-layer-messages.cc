@@ -4,25 +4,26 @@ using namespace omnetpp;
 
 namespace rfidsim {
 
-const char *ReplyTimeoutInd::NAME = "ReplyTimeoutInd";
+const char *PhyDataConf::NAME = "PhyDataConf";
 
-const char *str(PhyResponseType type)
+const char *str(PhyDataConfStatus status)
 {
-  switch (type) {
-    case PHY_RESPONSE_OK: return "OK";
-    case PHY_RESPONSE_COLLISION: return "Collision";
-    case PHY_RESPONSE_CHANNEL_ERROR: return "Channel Error";
-    default: throw cRuntimeError("unrecognized PhyResponseType = %d", type);
+  switch (status) {
+    case PHY_DATA_CONF_OK: return "OK";
+    case PHY_DATA_CONF_COLLISION: return "Collision";
+    case PHY_DATA_CONF_CHANNEL_ERROR: return "Channel Error";
+    case PHY_DATA_CONF_NO_REPLY: return "No Reply";
+    default: throw cRuntimeError("unrecognized PhyDataConfStatus = %d", status);
   }
 }
 
-Register_Class(ReplyTimeoutInd);
+Register_Class(PhyDataConf);
 
-std::string ReplyTimeoutInd::info() const
+std::string PhyDataConf::info() const
 {
   char buf[64];
-  snprintf(buf, sizeof(buf), "%s {response=%s}", NAME,
-           str(static_cast<PhyResponseType>(getResponse())));
+  snprintf(buf, sizeof(buf), "%s {status=%s}", NAME,
+           str(static_cast<PhyDataConfStatus>(getStatus())));
   return buf;
 }
 

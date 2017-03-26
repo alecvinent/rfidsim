@@ -31,12 +31,12 @@ void ReaderPhyLayer::handleMessage(cMessage *msg)
 
 void ReaderPhyLayer::processPowerOn(const PowerOn& signal)
 {
-  //TODO
+  // nothing to be done here
 }
 
 void ReaderPhyLayer::processPowerOff(const PowerOff& signal)
 {
-  //TODO
+  //
 }
 
 void ReaderPhyLayer::processTimeout(cMessage *msg)

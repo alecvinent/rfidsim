@@ -6,20 +6,20 @@
 
 namespace rfidsim {
 
-const char *str(PhyResponseType type);
+const char *str(PhyDataConfStatus status);
 
-class ReplyTimeoutInd : public ReplyTimeoutInd_Base {
+class PhyDataConf : public PhyDataConf_Base {
  public:
   static const char *NAME;
 
-  ReplyTimeoutInd() : ReplyTimeoutInd_Base(NAME) {}
-  ReplyTimeoutInd(const ReplyTimeoutInd& other) : ReplyTimeoutInd_Base(other) {}
-  virtual ~ReplyTimeoutInd() {}
+  PhyDataConf() : PhyDataConf_Base(NAME) {}
+  PhyDataConf(const PhyDataConf& other) : PhyDataConf_Base(other) {}
+  virtual ~PhyDataConf() {}
 
-  virtual ReplyTimeoutInd *dup() const { return new ReplyTimeoutInd(*this); }
+  virtual PhyDataConf *dup() const { return new PhyDataConf(*this); }
 
-  ReplyTimeoutInd& operator=(const ReplyTimeoutInd& other) {
-    ReplyTimeoutInd_Base::operator=(other);
+  PhyDataConf& operator=(const PhyDataConf& other) {
+    PhyDataConf_Base::operator=(other);
     return *this;
   }
 
