@@ -4,6 +4,7 @@
 #include <omnetpp.h>
 #include <protocol/epcstd-base.h>
 #include <protocol/epcstd-commands.h>
+#include <protocol/epcstd-responses.h>
 
 namespace rfidsim {
 namespace epcstd {
@@ -55,6 +56,12 @@ unsigned encodeReqRN(ReqRN *cmd, char *buf, unsigned size);
 unsigned encodeRead(Read *cmd, char *buf, unsigned size);
 
 unsigned countBits(const char *buf, unsigned *n_zeros, unsigned *n_ones);
+
+unsigned getBitLen(Reply *reply);
+unsigned getQueryReplyBitLen(QueryReply *reply);
+unsigned getAckReplyBitLen(AckReply *reply);
+unsigned getReqRNReplyBitLen(ReqRNReply *reply);
+unsigned getReadReplyBitLen(ReadReply *reply);
 
 }}
 

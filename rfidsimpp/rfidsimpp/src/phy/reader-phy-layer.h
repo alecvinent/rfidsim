@@ -3,7 +3,6 @@
 
 #include <omnetpp.h>
 #include <phy/phy-layer-base.h>
-#include <radio/transceivers/transceiver-signals.h>
 
 #define MAX_COMMAND_BITLEN  120
 
@@ -19,15 +18,6 @@ class ReaderPhyLayer : public PhyLayer {
   };
   static const char *str(State state);
   static PhyDataConfStatus convertRecvErrorToStatus(RecvErrorType error);
-
-  static omnetpp::simtime_t getT1(omnetpp::simtime_t rtcal,
-                                  omnetpp::simtime_t t_pri, double frt);
-
-  static omnetpp::simtime_t getT2(omnetpp::simtime_t t_pri);
-
-  static omnetpp::simtime_t getT3(omnetpp::simtime_t t_pri);
-
-  static omnetpp::simtime_t getT4(omnetpp::simtime_t rtcal);
 
   virtual ~ReaderPhyLayer();
 
@@ -63,16 +53,14 @@ class ReaderPhyLayer : public PhyLayer {
   omnetpp::simtime_t tari;
   omnetpp::simtime_t rtcal;
   omnetpp::simtime_t trcal;
-  double frt;
 
   epcstd::LinkTimingHelper link_timing;
+  nonstd::optional<epcstd::DivideRatio> dr;
 
   State state = OFF;
   omnetpp::cMessage *timer = nullptr;
   epcstd::Reply *recv_reply = nullptr;
   nonstd::optional<RecvErrorType> recv_error = nonstd::nullopt;
-
-  std::map<omnetpp::simsignal_t, omnetpp::cModule*> subscriptions;
 
   void setState(State state);
 };

@@ -6,6 +6,7 @@
 #include <protocol/epcstd-commands.h>
 #include <protocol/epcstd-responses.h>
 #include <radio/transceivers/transceiver-messages.h>
+#include <radio/transceivers/transceiver-signals.h>
 #include <power/power-unit-signals.h>
 
 namespace rfidsim {
@@ -21,6 +22,7 @@ class PhyLayer : public omnetpp::cSimpleModule, public omnetpp::cListener {
   virtual bool isOff() const = 0;
 
   int getDeviceID() const { return device_id; }
+  bool getExtendedTemp() const { return extended_temp; }
 
  protected:
   virtual void initialize();
@@ -37,9 +39,11 @@ class PhyLayer : public omnetpp::cSimpleModule, public omnetpp::cListener {
   virtual void processRecvBeginInd(RecvBeginInd *msg) = 0;
   virtual void processRecvDataInd(RecvDataInd *msg) = 0;
   virtual void processRecvErrorInd(RecvErrorInd *msg) = 0;
+  virtual void processTxFinish(const TxFinish& signal) = 0;
 
  private:
   int device_id = -1;
+  bool extended_temp = false;
   std::map<omnetpp::simsignal_t, omnetpp::cModule*> subscriptions;
 };
 

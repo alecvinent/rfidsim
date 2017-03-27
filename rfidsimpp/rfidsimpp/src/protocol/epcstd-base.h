@@ -21,6 +21,9 @@ double getBLF(omnetpp::simtime_t trcal, DivideRatio dr);
 double getTagBitRate(omnetpp::simtime_t trcal, DivideRatio dr, TagEncoding m);
 omnetpp::simtime_t getTpri(double blf);
 
+double getFrT(DivideRatio dr, omnetpp::simtime_t trcal,
+              bool extended_temp = false);
+
 unsigned getSessionIndex(Session session);
 Session getSessionFromIndex(unsigned index);
 

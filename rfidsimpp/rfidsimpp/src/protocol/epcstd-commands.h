@@ -7,6 +7,13 @@
 namespace rfidsim {
 namespace epcstd {
 
+enum CommandReplyType {
+  NO_REPLY, IMMEDIATE_REPLY, DELAYED_REPLY, INPROCESS_REPLY
+};
+
+CommandReplyType getCommandReplyType(CommandKind kind);
+
+const char *str(CommandReplyType type);
 const char *str(CommandKind kind);
 
 class ReaderPreamble : public omnetpp::cOwnedObject {

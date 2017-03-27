@@ -159,6 +159,39 @@ simtime_t getTpri(double blf)
   return SimTime(1.0 / blf);
 }
 
+double getFrT(DivideRatio dr, simtime_t trcal, bool extended_temp)
+{
+  // Here we approximate what is given in table 6.9 of the EPC Class 1 Gen 2.
+  // Very rough approximation.
+  double t = trcal.dbl() * 1e6;
+  if (dr == DR_64_3)
+  {
+    if (t <= 33.31) return 0.15;
+    else if (t <= 66.69) return 0.22;
+    else if (t <= 66.71) return extended_temp ? 0.15 : 0.10;
+    else if (t <= 83.29) return extended_temp ? 0.15 : 0.12;
+    else if (t <= 83.31) return 0.10;
+    else if (t <= 133.30) return extended_temp ? 0.12 : 0.10;
+    else if (t <= 200.00) return 0.07;
+    else return 0.05;
+  }
+  else if (dr == DR_8)
+  {
+    if (t <= 24.99) return 0.19;
+    else if (t <= 25.01) return extended_temp ? 0.15 : 0.10;
+    else if (t <= 31.24) return extended_temp ? 0.15 : 0.12;
+    else if (t <= 31.26) return 0.10;
+    else if (t <= 49.99) return 0.10;
+    else if (t <= 50.01) return 0.07;
+    else if (t <= 75.00) return 0.07;
+    else return 0.04;
+  }
+  else
+  {
+    throw cRuntimeError("unrecognized DivideRation = %d", dr);
+  }
+}
+
 unsigned getSessionIndex(Session session)
 {
   switch (session)

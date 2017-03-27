@@ -1,4 +1,4 @@
-#include <protocol/epcstd-command-encoder.h>
+#include <protocol/epcstd-encoder.h>
 
 using namespace omnetpp;
 
@@ -277,6 +277,41 @@ unsigned countBits(const char *buf, unsigned *n_zeros, unsigned *n_ones)
   if (n_zeros) *n_zeros = n0s;
   if (n_ones) *n_ones = n1s;
   return bitlen;
+}
+
+unsigned getBitLen(Reply *reply)
+{
+  auto kind = reply->getKind();
+  if (kind == KIND_QUERY_REPLY)
+    return getQueryReplyBitLen(dynamic_cast<QueryReply*>(reply));
+  else if (kind == KIND_ACK_REPLY)
+    return getAckReplyBitLen(dynamic_cast<AckReply*>(reply));
+  else if (kind == KIND_REQ_RN_REPLY)
+    return getReqRNReplyBitLen(dynamic_cast<ReqRNReply*>(reply));
+  else if (kind == KIND_READ_REPLY)
+    return getReadReplyBitLen(dynamic_cast<ReadReply*>(reply));
+  else
+    throw cRuntimeError("unrecognized reply kind = %d", kind);
+}
+
+unsigned getQueryReplyBitLen(QueryReply *reply)
+{
+  return 16;
+}
+
+unsigned getAckReplyBitLen(AckReply *reply)
+{
+  return 32 + 8 * reply->getEPCByteLength();  // |PC|=16, |PacketCRC|=16
+}
+
+unsigned getReqRNReplyBitLen(ReqRNReply *reply)
+{
+  return 32;
+}
+
+unsigned getReadReplyBitLen(ReadReply *reply)
+{
+  return 33 + 8 * reply->getMemByteLength();
 }
 
 }}

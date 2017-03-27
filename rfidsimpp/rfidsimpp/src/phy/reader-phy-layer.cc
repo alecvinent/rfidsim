@@ -1,8 +1,7 @@
 #include <phy/reader-phy-layer.h>
-#include <radio/transceivers/transceiver-base.h>
 #include <common/module-access.h>
+#include <protocol/epcstd-encoder.h>
 #include <protocol/epcstd-base.h>
-#include <protocol/epcstd-command-encoder.h>
 
 using namespace omnetpp;
 
@@ -40,8 +39,6 @@ PhyDataConfStatus ReaderPhyLayer::convertRecvErrorToStatus(RecvErrorType error)
 ReaderPhyLayer::~ReaderPhyLayer()
 {
   cancelAndDelete(timer);
-  for (auto i = subscriptions.begin(); i != subscriptions.end(); ++i)
-    i->second->unsubscribe(i->first, this);
 }
 
 void ReaderPhyLayer::initialize()
@@ -52,18 +49,10 @@ void ReaderPhyLayer::initialize()
   tari = SimTime(par("tari"));
   rtcal = SimTime(par("rtcal"));
   trcal = SimTime(par("trcal"));
-  frt = par("frt").doubleValue();
 
   link_timing.setRTcal(rtcal);
-  link_timing.setFrT(frt);
+  link_timing.unsetFrT();
   link_timing.unsetTpri();
-
-  auto device = getEnclosingRFIDDevice(this);
-  subscriptions.clear();
-  subscriptions[Transmitter::TX_FINISH_SIGNAL_ID] = device;
-
-  for (auto i = subscriptions.begin(); i != subscriptions.end(); ++i)
-    i->second->subscribe(i->first, this);
 
   state = OFF;
 }
@@ -90,6 +79,7 @@ void ReaderPhyLayer::processPowerOff(const PowerOff& signal)
     if (timer->isScheduled())
       cancelEvent(timer);
     link_timing.unsetTpri(); // T_pri is computed based on DR from Query
+    link_timing.unsetFrT();  // FrT also depends on DR
   }
 }
 
@@ -164,6 +154,7 @@ void ReaderPhyLayer::processRecvBeginInd(RecvBeginInd *msg)
     setState(RX_IR);
     cancelEvent(timer);
   }
+  delete msg;
 }
 
 void ReaderPhyLayer::processRecvDataInd(RecvDataInd *msg)
@@ -176,16 +167,30 @@ void ReaderPhyLayer::processRecvDataInd(RecvDataInd *msg)
     scheduleAt(simTime() + t2, timer);
     setState(WAIT_READY_IR_REPLIED);
   }
+  else
+  {
+    throw cRuntimeError("unexpected message '%s' in state %s",
+                        msg->getFullName(), str(state));
+  }
   delete msg;
 }
 
 void ReaderPhyLayer::processRecvErrorInd(RecvErrorInd *msg)
 {
-  recv_reply = nullptr;
-  recv_error = static_cast<RecvErrorType>(msg->getType());
-  auto t2 = link_timing.getMinT(2);
-  scheduleAt(simTime() + t2, timer);
-  setState(WAIT_READY_IR_ERROR);
+  if (state == RX_IR)
+  {
+    recv_reply = nullptr;
+    recv_error = static_cast<RecvErrorType>(msg->getType());
+    auto t2 = link_timing.getMinT(2);
+    scheduleAt(simTime() + t2, timer);
+    setState(WAIT_READY_IR_ERROR);
+  }
+  else
+  {
+    throw cRuntimeError("unexpected message '%s' in state %s",
+                        msg->getFullName(), str(state));
+  }
+  delete msg;
 }
 
 void ReaderPhyLayer::processCommand(epcstd::Command *msg)
@@ -200,10 +205,12 @@ void ReaderPhyLayer::processCommand(epcstd::Command *msg)
     if (msg->getKind() == epcstd::KIND_COMMAND_QUERY)
     {
       auto query = static_cast<epcstd::Query*>(msg);
-      auto dr = static_cast<epcstd::DivideRatio>(query->getDR());
-      auto blf = epcstd::getBLF(trcal, dr);
+      dr = static_cast<epcstd::DivideRatio>(query->getDR());
+      auto blf = epcstd::getBLF(trcal, *dr);
       auto t_pri = epcstd::getTpri(blf);
+
       link_timing.setTpri(t_pri);
+      link_timing.setFrT(epcstd::getFrT(*dr, trcal, getExtendedTemp()));
 
       preamble.setTRcal(trcal);
       preamble.setType(epcstd::ReaderPreamble::PREAMBLE);
@@ -232,6 +239,17 @@ void ReaderPhyLayer::processCommand(epcstd::Command *msg)
     req->encapsulate(msg);
 
     send(req, getRadioOut());
+
+    auto type = epcstd::getCommandReplyType(
+            static_cast<epcstd::CommandKind>(msg->getKind()));
+    if (type == epcstd::NO_REPLY)
+      setState(TX_NR);
+    else if (type == epcstd::IMMEDIATE_REPLY)
+      setState(TX_IR);
+    else
+      throw cRuntimeError("commands with reply type '%s' not supported",
+                          epcstd::str(type));
+
   }
   else
   {

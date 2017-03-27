@@ -1,6 +1,7 @@
 #include <phy/phy-layer-base.h>
 #include <common/module-access.h>
 #include <power/power-unit-base.h>
+#include <radio/transceivers/transceiver-base.h>
 
 using namespace omnetpp;
 
@@ -15,11 +16,13 @@ PhyLayer::~PhyLayer()
 void PhyLayer::initialize()
 {
   device_id = static_cast<int>(par("deviceID").longValue());
+  extended_temp = par("extendedTemp").boolValue();
 
   auto device = getEnclosingRFIDDevice(this);
   subscriptions.clear();
   subscriptions[PowerUnit::POWER_OFF_SIGNAL_ID] = device;
   subscriptions[PowerUnit::POWER_ON_SIGNAL_ID] = device;
+  subscriptions[Transmitter::TX_FINISH_SIGNAL_ID] = device;
   for (auto i = subscriptions.begin(); i != subscriptions.end(); ++i)
     i->second->subscribe(i->first, this);
 }
@@ -52,6 +55,12 @@ void PhyLayer::receiveSignal(cComponent *source, simsignal_t signal_id,
     auto signal = static_cast<PowerOn*>(obj);
     if (signal->device_id == device_id)
       processPowerOn(*signal);
+  }
+  else if (signal_id == Transmitter::TX_FINISH_SIGNAL_ID)
+  {
+    auto signal = static_cast<TxFinish*>(obj);
+    if (signal->device_id == device_id)
+      processTxFinish(*signal);
   }
 }
 

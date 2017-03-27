@@ -57,6 +57,29 @@ const char *str(CommandKind kind)
   }
 }
 
+CommandReplyType getCommandReplyType(CommandKind kind)
+{
+  if (kind == KIND_COMMAND_QUERY || kind == KIND_COMMAND_QUERY_REP ||
+          kind == KIND_COMMAND_ACK || kind == KIND_COMMAND_REQ_RN ||
+          kind == KIND_COMMAND_READ)
+    return IMMEDIATE_REPLY;
+  else
+    throw cRuntimeError("unrecognized CommandKind = %d", kind);
+}
+
+const char *str(CommandReplyType type)
+{
+  switch (type)
+  {
+    case NO_REPLY: return "No Reply";
+    case IMMEDIATE_REPLY: return "Immediate Reply";
+    case DELAYED_REPLY: return "Delayed Reply";
+    case INPROCESS_REPLY: return "In-Process Reply";
+    default: throw cRuntimeError("unrecognized CommandReplyType = %d", type);
+  }
+}
+
+
 //
 //===========================================================================
 // Query

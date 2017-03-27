@@ -4,6 +4,7 @@ simple Phy {
     parameters:
         @display("i=block/mac");
         int deviceID;
+        bool extendedTemp = default(false);
     gates:
         input logicInp;
         output logicOut;
@@ -18,7 +19,6 @@ simple ReaderPhy extends Phy {
         double tari @unit(s);
         double rtcal @unit(s);
         double trcal @unit(s); 
-        double frt;       
 }
 
 simple TagPhy extends Phy {
