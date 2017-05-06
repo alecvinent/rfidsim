@@ -21,4 +21,6 @@ simple ActivePowerUnit extends PowerUnit {
         double powerOnDuration @unit(s);
         double powerOffDuration @unit(s);
         double maxPower @unit(dBm) = default(31.5dBm);
+    gates:
+        input appInp;
 }

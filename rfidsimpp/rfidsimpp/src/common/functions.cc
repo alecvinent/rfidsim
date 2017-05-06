@@ -1,5 +1,10 @@
 #include <common/functions.h>
 #include <iomanip>
+#include <functional>
+#include <algorithm>
+#include <cctype>
+#include <locale>
+#include <string>
 
 using namespace omnetpp;
 
@@ -40,6 +45,46 @@ std::vector<uint8_t> parseHexString(const std::string& s)
     bytes.push_back(msb * 0x10 + lsb);
   }
   return bytes;
+}
+
+std::string ltrim(const std::string& s)
+{
+  std::string out_s = s;
+  out_s.erase(out_s.begin(),
+          std::find_if(out_s.begin(), out_s.end(),
+                       std::not1(std::ptr_fun<int, int>(std::isspace))));
+  return out_s;
+}
+
+std::string rtrim(const std::string& s)
+{
+  std::string out_s;
+  out_s.erase(std::find_if(out_s.rbegin(), out_s.rend(),
+                           std::not1(std::ptr_fun<int, int>(std::isspace))
+                          ).base(),
+          out_s.end());
+  return out_s;
+}
+
+std::string trim(const std::string& s)
+{
+  return rtrim(ltrim(s));
+}
+
+std::string lower(const std::string& s)
+{
+  std::string out_s = s;
+  std::transform(out_s.begin(), out_s.end(), out_s.begin(),
+                 [](unsigned char c) { return std::tolower(c); });
+  return out_s;
+}
+
+std::string upper(const std::string& s)
+{
+  auto out_s = s;
+  std::transform(out_s.begin(), out_s.end(), out_s.begin(),
+                 [](unsigned char c) { return std::toupper(c); });
+  return out_s;
 }
 
 }

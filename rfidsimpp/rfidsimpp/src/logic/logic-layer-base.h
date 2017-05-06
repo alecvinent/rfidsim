@@ -9,6 +9,16 @@
 
 namespace rfidsim {
 
+struct RoundDescriptor {
+  epcstd::Session session;
+  epcstd::Sel sel;
+  epcstd::InventoryFlag target;
+  epcstd::DivideRatio dr;
+  epcstd::TagEncoding m;
+  bool trext;
+  unsigned q;
+};
+
 class LogicLayer : public omnetpp::cSimpleModule, public omnetpp::cListener {
  public:
   virtual ~LogicLayer();

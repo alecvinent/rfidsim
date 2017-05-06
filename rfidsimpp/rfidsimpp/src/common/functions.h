@@ -31,6 +31,12 @@ T minimum(T first, Args... args) {
 std::string toHexString(const std::vector<uint8_t>& v);
 std::vector<uint8_t> parseHexString(const std::string& s);
 
+std::string ltrim(const std::string& s);
+std::string rtrim(const std::string& s);
+std::string trim(const std::string& s);
+std::string lower(const std::string& s);
+std::string upper(const std::string& s);
+
 
 }
 

@@ -1,5 +1,7 @@
 #include <logic/reader-logic-layer.h>
 #include <logic/reader-logic-layer-signals.h>
+#include <functional>
+#include <common/functions.h>
 
 using namespace omnetpp;
 
@@ -20,10 +22,8 @@ const char *ReaderLogicLayer::str(State state)
 {
   switch (state) {
     case OFF: return "OFF";
-    case QUERY: return "QUERY";
-    case ACK: return "ACK";
-    case REQ_RN: return "REQ_RN";
-    case READ_TID: return "READ_TID";
+    case INVENTORY: return "INVENTORY";
+    case ACCESS: return "ACCESS";
     default: throw cRuntimeError("unrecognized ReaderLogicLayer state = %d",
                                  state);
   }
@@ -31,41 +31,102 @@ const char *ReaderLogicLayer::str(State state)
 
 ReaderLogicLayer::~ReaderLogicLayer()
 {
-  //TODO
+  delete controller;
+  round_man->stop();
+  delete round_man;
+  cancelAndDelete(launch_msg);
 }
 
 void ReaderLogicLayer::initialize()
 {
+  using namespace std::placeholders;
   LogicLayer::initialize();
+
+  auto ack_cb = std::bind(&ReaderLogicLayer::processTagAck, this,
+                          _1, _2, _3);
+  auto data_cb = std::bind(&ReaderLogicLayer::processTagData, this, _1);
+  auto success_cb = std::bind(&ReaderLogicLayer::processTagSuccess, this);
+  auto error_cb = std::bind(&ReaderLogicLayer::processTagError, this, _1);
+  round_man = new ReaderRoundManager(this, ack_cb, data_cb, success_cb,
+                                     error_cb);
+
+  launch_msg = new cMessage("reader-logic-layer-launch");
+
+  // Initializing controller
+  controller = check_and_cast<reader::logic::Controller*>(
+          createOne(par("controller").stringValue()));
+  auto controller_settings = par("controllerSettings").xmlValue();
+  controller->setUp(this, controller_settings);
+
+  // Loading parameters
+  auto i_session = static_cast<int>(par("session").longValue());
+  if (i_session == 0)
+    round_descriptor.session = epcstd::SESSION_0;
+  else if (i_session == 1)
+    round_descriptor.session = epcstd::SESSION_1;
+  else if (i_session == 2)
+    round_descriptor.session = epcstd::SESSION_2;
+  else if (i_session == 3)
+    round_descriptor.session = epcstd::SESSION_3;
+  else
+    throw cRuntimeError("unrecognized session value = %d", i_session);
+
+  auto i_sel = static_cast<int>(par("sel").longValue());
+  if (i_sel == 0)
+    round_descriptor.sel = epcstd::SEL_NOT;
+  else if (i_sel == 1)
+    round_descriptor.sel = epcstd::SEL_YES;
+  else if (i_sel == 2)
+    round_descriptor.sel = epcstd::SEL_ALL;
+  else
+    throw cRuntimeError("unrecognized sel value = %d", i_sel);
+
+  auto s_target = upper(trim(par("target").stdstringValue()));
+  if (s_target == "A")
+    round_descriptor.target = epcstd::FLAG_A;
+  else if (s_target == "B")
+    round_descriptor.target = epcstd::FLAG_B;
+  else
+    throw cRuntimeError("unrecognized target value = '%s'", s_target.c_str());
+
+  auto i_q = static_cast<int>(par("q").longValue());
+  if (i_q >= 0 && i_q < 16)
+    round_descriptor.q = i_q;
+  else
+    throw cRuntimeError("out-of-bounds Q value = %d", i_q);
+
+  auto s_m = upper(trim(par("m").stdstringValue()));
+  if (s_m == "FM0")
+    round_descriptor.m = epcstd::FM_0;
+  else if (s_m == "M2" || s_m == "MILLER2")
+    round_descriptor.m = epcstd::MILLER_2;
+  else if (s_m == "M4" || s_m == "MILLER4")
+    round_descriptor.m = epcstd::MILLER_4;
+  else if (s_m == "M8" || s_m == "MILLER8")
+    round_descriptor.m = epcstd::MILLER_8;
+  else
+    throw cRuntimeError("unrecognized M value = '%s'", par("m").stringValue());
+
+  auto s_dr = trim(par("dr").stdstringValue());
+  if (s_dr == "8")
+    round_descriptor.dr = epcstd::DR_8;
+  else if (s_dr == "64/3")
+    round_descriptor.dr = epcstd::DR_64_3;
+  else
+    throw cRuntimeError("unrecognized DR value = '%s'",
+                        par("dr").stringValue());
+
+  round_descriptor.trext = par("trext").boolValue();
 }
 
 void ReaderLogicLayer::handleMessage(cMessage *msg)
 {
   if (dynamic_cast<PhyDataConf*>(msg))
-  {
-    auto conf = static_cast<PhyDataConf*>(msg);
-    auto status = static_cast<PhyDataConfStatus>(conf->getStatus());
-    if (status == PHY_DATA_CONF_OK)
-    {
-      auto reply = conf->decapsulate();
-      auto kind = reply->getKind();
-      if (kind == epcstd::KIND_QUERY_REPLY)
-        processQueryReply(check_and_cast<epcstd::QueryReply*>(reply));
-      else if (kind == epcstd::KIND_ACK_REPLY)
-        processAckReply(check_and_cast<epcstd::AckReply*>(reply));
-      else if (kind == epcstd::KIND_REQ_RN_REPLY)
-        processReqRNReply(check_and_cast<epcstd::ReqRNReply*>(reply));
-      else if (kind == epcstd::KIND_READ_REPLY)
-        processReadReply(check_and_cast<epcstd::ReadReply*>(reply));
-      else
-        throw cRuntimeError("unsupported epcstd::Reply kind = %d", kind);
-    }
-    else
-    {
-      processPhyError(status);
-    }
-    delete msg;
-  }
+    round_man->handlePhyDataConf(check_and_cast<PhyDataConf*>(msg));
+  else if (dynamic_cast<TagConnReq*>(msg))
+    processTagConnReq(check_and_cast<TagConnReq*>(msg));
+  else if (dynamic_cast<CloseTagConn*>(msg))
+    processCloseTagConn(check_and_cast<CloseTagConn*>(msg));
   else
   {
     LogicLayer::handleMessage(msg);
@@ -74,42 +135,133 @@ void ReaderLogicLayer::handleMessage(cMessage *msg)
 
 void ReaderLogicLayer::processPowerOn(const PowerOn& signal)
 {
-  //TODO
+  setState(INVENTORY);
+  scheduleAt(simTime(), launch_msg);
 }
 
 void ReaderLogicLayer::processPowerOff(const PowerOff& signal)
 {
-  //TODO
+  setState(OFF);
+  round_man->stop();
 }
 
 void ReaderLogicLayer::processTimeout(cMessage *msg)
 {
-  //TODO
+  if (msg == launch_msg)
+  {
+    startRound();
+  }
 }
 
-void ReaderLogicLayer::processQueryReply(epcstd::QueryReply *msg)
+void ReaderLogicLayer::processCloseTagConn(CloseTagConn *msg)
 {
-  //TODO
+  if (state != OFF) {
+    startNextSlot();
+  }
+  delete msg;
 }
 
-void ReaderLogicLayer::processAckReply(epcstd::AckReply *msg)
+void ReaderLogicLayer::processTagConnReq(TagConnReq *msg)
 {
-  //TODO
+  if (state != OFF) {
+    auto tagop = check_and_cast<tagop::Request*>(msg->decapsulate());
+    auto kind = tagop->getKind();
+    if (kind == tagop::KIND_ACK)
+      processAcknowledgeTagOp(check_and_cast<tagop::Acknowledge*>(tagop));
+    else if (kind == tagop::KIND_READ_BANK)
+      processReadBankTagOp(check_and_cast<tagop::ReadBank*>(tagop));
+    else
+      throw cRuntimeError("unrecognized tagop::Request kind = %d", kind);
+  }
+  delete msg;
 }
 
-void ReaderLogicLayer::processReqRNReply(epcstd::ReqRNReply *msg)
+//
+//---------------------------------------------------------------------------
+// Tag Operations processing
+//---------------------------------------------------------------------------
+//
+
+void ReaderLogicLayer::processAcknowledgeTagOp(tagop::Acknowledge *msg)
 {
-  //TODO
+  ASSERT(state != OFF);
+  round_man->acknowledge();
 }
 
-void ReaderLogicLayer::processReadReply(epcstd::ReadReply *msg)
+void ReaderLogicLayer::processReadBankTagOp(tagop::ReadBank *msg)
 {
-  //TODO
+  ASSERT(state != OFF);
+  round_man->readBank(static_cast<epcstd::MemoryBank>(msg->getBank()),
+                      msg->getWordPtr(), msg->getWordCount());
 }
 
-void ReaderLogicLayer::processPhyError(PhyDataConfStatus error)
+//
+//---------------------------------------------------------------------------
+// Reader Round Manager callbacks
+//---------------------------------------------------------------------------
+//
+void ReaderLogicLayer::processTagSuccess()
 {
-  //TODO
+  // nothing should be done here since SELECT is not supported yet
+}
+
+void ReaderLogicLayer::processTagError(LogicError error)
+{
+  // TODO: call controller
+
+}
+
+void ReaderLogicLayer::processTagAck(long tag_id, unsigned pc,
+                                         const std::vector<uint8_t>& epc)
+{
+  auto info = new tagop::TagInfo;
+  info->setEPC(epc);
+  info->setPC(pc);
+
+  TagConnPkt *pkt = nullptr;
+
+  if (state == INVENTORY) {
+    curr_tag_id = tag_id;
+    pkt = new NewTagConn;
+    setState(ACCESS);
+  }
+  else if (state == ACCESS) {
+    pkt = new TagConnConf;
+  }
+  else {
+    throw cRuntimeError("unexpected TagRead in state=%s", str(state));
+  }
+
+  pkt->encapsulate(info);
+  send(pkt, "appOut");
+}
+
+void ReaderLogicLayer::processTagData(const std::vector<uint8_t>& pc)
+{
+
+}
+
+void ReaderLogicLayer::startRound()
+{
+  RoundDescriptor curr_descr = round_descriptor;
+  controller->getParams(curr_descr, &round_descriptor);
+  slot_index = 1;
+  slots_num = static_cast<int>(pow(2, round_descriptor.q));
+  round_man->start(round_descriptor);
+}
+
+void ReaderLogicLayer::startNextSlot()
+{
+  ++slot_index;
+  if (slot_index > slots_num)
+    startRound();
+  else
+    round_man->nextSlot();
+}
+
+void ReaderLogicLayer::setState(State state)
+{
+  this->state = state;
 }
 
 }

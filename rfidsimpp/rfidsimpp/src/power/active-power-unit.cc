@@ -32,7 +32,12 @@ void ActivePowerUnit::handleMessage(omnetpp::cMessage *msg)
     processTimeout(msg);
   else
   {
-    throw cRuntimeError("unrecognized message: %s", msg->info().c_str());
+    if (dynamic_cast<TurnPowerUnitOn*>(msg))
+      processTurnPowerUnitOn(check_and_cast<TurnPowerUnitOn*>(msg));
+    else if (dynamic_cast<TurnPowerUnitOff*>(msg))
+      processTurnPowerUnitOff(check_and_cast<TurnPowerUnitOff*>(msg));
+    else
+      throw cRuntimeError("unrecognized message: %s", msg->info().c_str());
   }
 }
 
@@ -49,6 +54,29 @@ void ActivePowerUnit::processTimeout(omnetpp::cMessage *timer)
     powerOn(max_power);
     scheduleAt(simTime() + power_on_duration, timer);
   }
+}
+
+void ActivePowerUnit::processTurnPowerUnitOn(TurnPowerUnitOn *msg)
+{
+  if (!turned_on)
+  {
+    turned_on = true;
+    powerOn(max_power);
+    scheduleAt(simTime() + power_on_duration, timer);
+  }
+  delete msg;
+}
+
+void ActivePowerUnit::processTurnPowerUnitOff(TurnPowerUnitOff *msg)
+{
+  if (turned_on)
+  {
+    turned_on = false;
+    cancelEvent(timer);
+    if (isOn())
+      powerOff();
+  }
+  delete msg;
 }
 
 }

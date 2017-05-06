@@ -3,6 +3,10 @@
 
 #include <logic/logic-layer-base.h>
 #include <phy/phy-layer-messages.h>
+#include <logic/reader-round-manager.h>
+#include <logic/reader-logic-sap.h>
+#include <logic/reader-tagops.h>
+#include <logic/control/reader-logic-controller.h>
 
 namespace rfidsim {
 
@@ -12,21 +16,13 @@ class ReaderLogicLayer : public LogicLayer {
   static omnetpp::simsignal_t NEW_SLOT_SIGNAL_ID;
   static omnetpp::simsignal_t NEW_ROUND_SIGNAL_ID;
 
-  enum State { OFF, QUERY, ACK, REQ_RN, READ_TID };
+  enum State { OFF, INVENTORY, ACCESS };
   static const char *str(State state);
 
   virtual ~ReaderLogicLayer();
 
-  unsigned getQ() const { return q; }
-  epcstd::TagEncoding getM() const { return m; }
-  epcstd::DivideRatio getDR() const { return dr; }
-  bool getTRext() const { return trext; }
-  bool getReadTidBank() const { return read_tid_bank; }
-
-  void setQ(unsigned q) { this->q = q; }
-  void setM(epcstd::TagEncoding m) { this->m = m; }
-  void setTRext(bool trext) { this->trext = trext; }
-  void setReadTIDBank(bool v) { this->read_tid_bank = v; }
+  omnetpp::cGate *getPhyOut() { return gate("phyOut"); }
+  const RoundDescriptor& getRoundDescriptor() const { return round_descriptor; }
 
  protected:
   virtual void initialize();
@@ -36,24 +32,36 @@ class ReaderLogicLayer : public LogicLayer {
   virtual void processPowerOff(const PowerOff& signal);
   virtual void processTimeout(omnetpp::cMessage *msg);
 
-  virtual void processQueryReply(epcstd::QueryReply *msg);
-  virtual void processAckReply(epcstd::AckReply *msg);
-  virtual void processReqRNReply(epcstd::ReqRNReply *msg);
-  virtual void processReadReply(epcstd::ReadReply *msg);
-  virtual void processPhyError(PhyDataConfStatus error);
+  virtual void processCloseTagConn(CloseTagConn *msg);
+  virtual void processTagConnReq(TagConnReq *msg);
+
+  virtual void processAcknowledgeTagOp(tagop::Acknowledge *msg);
+  virtual void processReadBankTagOp(tagop::ReadBank *msg);
+
+  virtual void processTagSuccess();
+  virtual void processTagError(LogicError error);
+  virtual void processTagAck(long tag_id, unsigned pc,
+                             const std::vector<uint8_t>& epc);
+  virtual void processTagData(const std::vector<uint8_t>& pc);
+
+  virtual void startRound();
+  virtual void startNextSlot();
 
  private:
-  unsigned q;
-  epcstd::TagEncoding m;
-  epcstd::DivideRatio dr;
-  bool trext;
-  bool read_tid_bank;
+  RoundDescriptor round_descriptor;
+  reader::logic::Controller *controller = nullptr;
+  ReaderRoundManager *round_man = nullptr;
 
-  unsigned handle;
+  State state = OFF;
+
   unsigned slots_num;
   unsigned slot_index;
-
   unsigned long round_index;
+  long curr_tag_id;
+
+  omnetpp::cMessage *launch_msg = nullptr;
+
+  void setState(State state);
 };
 
 }

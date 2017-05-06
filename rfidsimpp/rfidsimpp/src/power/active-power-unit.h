@@ -2,6 +2,7 @@
 #define RFIDSIMPP_POWER_ACTIVE_POWER_UNIT_H_
 
 #include <power/power-unit-base.h>
+#include <power/active-power-unit-sap.h>
 
 namespace rfidsim {
 
@@ -19,6 +20,8 @@ class ActivePowerUnit : public PowerUnit {
   virtual void handleMessage(omnetpp::cMessage *msg);
 
   virtual void processTimeout(omnetpp::cMessage *timer);
+  virtual void processTurnPowerUnitOn(TurnPowerUnitOn *msg);
+  virtual void processTurnPowerUnitOff(TurnPowerUnitOff *msg);
 
  private:
   omnetpp::simtime_t power_on_duration = omnetpp::SimTime::ZERO;
@@ -26,6 +29,8 @@ class ActivePowerUnit : public PowerUnit {
   Power max_power = Power::ZERO;
 
   omnetpp::cMessage *timer = nullptr;
+
+  bool turned_on = false;
 };
 
 }
